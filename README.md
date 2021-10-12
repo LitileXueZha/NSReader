@@ -18,3 +18,9 @@ Modify some files to run: change `RNProjects/package.json`'s `name` field to oth
 // RNProjects/index.js
 import App from './NSReader/src/index.js';
 ```
+
+Install [`react-native-navigation`](https://wix.github.io/react-native-navigation/docs/installing) in `RNProjects`。
+
+## More
+
+Color pattle: https://dribbble.com/shots/3285924-Reader-for-Selfoss。

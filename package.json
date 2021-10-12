@@ -30,5 +30,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "react-native-navigation": "^7.22.3"
   }
 }
