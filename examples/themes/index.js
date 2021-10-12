@@ -1,4 +1,4 @@
-import React, { useState, Component } from 'react';
+import React, { Component } from 'react';
 import { Navigation } from 'react-native-navigation';
 import {
     WHITE,
@@ -46,6 +46,7 @@ export default class ThemeProvider extends Component {
     componentDidMount() {
         $ev.on('themechange', this.setTheme);
     }
+
     componentWillUnmount() {
         $ev.off('themechange', this.setTheme);
     }
@@ -74,6 +75,7 @@ export default class ThemeProvider extends Component {
 }
 
 export function registerTheme(ScreenComponent) {
+    // eslint-disable-next-line arrow-body-style
     return () => (props) => {
         return (
             <ThemeProvider type="main">

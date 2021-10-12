@@ -1,4 +1,3 @@
-
 import { StyleSheet } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 import Components from './RNComponents.js';

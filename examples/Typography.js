@@ -7,11 +7,6 @@ import { StyleView, StyleText } from './components/Style.js';
 import { ThemeContext } from './themes';
 
 export default class Typography extends Component {
-    static contextType = ThemeContext;
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         const { theme } = this.context;
         return (
@@ -29,3 +24,5 @@ export default class Typography extends Component {
         );
     }
 }
+
+Typography.contextType = ThemeContext;

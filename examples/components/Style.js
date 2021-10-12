@@ -1,15 +1,19 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text } from 'react-native';
 
-import { useContext } from 'react';
 import { ThemeContext } from '../themes';
 
 export default function Style(props) {
-    const { component: C, style, children, ...restProps } = props;
+    const {
+        component: C,
+        style,
+        children,
+        ...restProps
+    } = props;
     const ctx = useContext(ThemeContext);
 
     return (
-        <C style={[ctx.theme, style]} {...restProps} >
+        <C style={[ctx.theme, style]} {...restProps}>
             {children}
         </C>
     );
@@ -21,7 +25,11 @@ function HOC(Component) {
 
 // export const StyleView = HOC(View);
 export function StyleView(props) {
-    const { style, children, size, ...restProps } = props;
+    const {
+        style,
+        children,
+        size, ...restProps
+    } = props;
     const ctx = useContext(ThemeContext);
     const { margin, padding } = ctx.theme;
     const themeStyles = {
@@ -35,13 +43,22 @@ export function StyleView(props) {
             {children}
         </View>
     );
-
 }
 
 export function StyleText(props) {
-    const { style, children, size, ...restProps } = props;
+    const {
+        style,
+        children,
+        size,
+        ...restProps
+    } = props;
     const ctx = useContext(ThemeContext);
-    const { fontColor, fontHeight, fontSize, fontSizeSmall } = ctx.theme;
+    const {
+        fontColor,
+        fontHeight,
+        fontSize,
+        fontSizeSmall,
+    } = ctx.theme;
     const themeStyles = {
         color: fontColor,
         lineHeight: fontHeight,
