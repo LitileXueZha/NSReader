@@ -8,6 +8,7 @@ import {
     WHITE_DARK,
     BLACK_DARK,
 } from './colors.js';
+// TODO: 将排版从主题中移除
 import typo from './typography.js';
 import $ev from '../utils/Event.js';
 
@@ -17,6 +18,7 @@ import $ev from '../utils/Event.js';
 export const themes = {
     main: {
         ...typo,
+        id: 'main',
         background: WHITE,
         fontColor: BLACK,
         borderColor: BORDER,
@@ -25,6 +27,7 @@ export const themes = {
     },
     dark: {
         ...typo,
+        id: 'dark',
         background: BLACK,
         fontColor: WHITE,
         borderColor: BORDER,

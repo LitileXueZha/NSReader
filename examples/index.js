@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 import Components from './RNComponents.js';
 import API from './API.js';
@@ -6,11 +6,13 @@ import Typography from './Typography.js';
 import { registerTheme, themes } from './themes';
 import iconTab from '../assets/ic_tab.png';
 import iconTabSelected from '../assets/ic_tab_selected.png';
+import './pages/RNActivityIndicator.js';
 
 Navigation.registerComponent('com', registerTheme(Components), () => Components);
 Navigation.registerComponent('api', registerTheme(API), () => API);
 Navigation.registerComponent('typ', registerTheme(Typography), () => Typography);
 Navigation.setDefaultOptions({
+    topBar: { visible: false },
     layout: {
         componentBackgroundColor: themes.main.background,
     },
@@ -29,19 +31,35 @@ Navigation.setDefaultOptions({
         textColor: themes.main.fontColorSecond,
         selectedTextColor: themes.main.fontColor,
     },
+    animations: {
+        push: {
+            content: {
+                translationX: {
+                    from: Dimensions.get('window').width,
+                    to: 0,
+                    duration: 200,
+                },
+            },
+        },
+        pop: {
+            content: {
+                translationX: {
+                    from: 0,
+                    to: Dimensions.get('window').width,
+                    duration: 200,
+                },
+            },
+        },
+    },
 });
 
-const routes = {
+const tabs = {
     bottomTabs: {
         children: [{
-            stack: {
-                children: [{
-                    component: { id: 'api', name: 'api' },
-                }],
+            component: {
+                id: 'api',
+                name: 'api',
                 options: {
-                    topBar: {
-                        visible: false,
-                    },
                     bottomTab: {
                         text: 'API',
                         icon: iconTab,
@@ -50,14 +68,10 @@ const routes = {
                 },
             },
         }, {
-            stack: {
-                children: [{
-                    component: { id: 'com', name: 'com' },
-                }],
+            component: {
+                id: 'com',
+                name: 'com',
                 options: {
-                    topBar: {
-                        visible: false,
-                    },
                     bottomTab: {
                         text: 'Components',
                         icon: iconTab,
@@ -66,12 +80,12 @@ const routes = {
                 },
             },
         }, {
-            stack: {
-                children: [{
-                    component: { id: 'typ', name: 'typ' },
-                }],
+            component: {
+                id: 'typ',
+                name: 'typ',
                 options: {
                     topBar: {
+                        visible: true,
                         title: { text: 'Typography' },
                         subtitle: { text: 'some text for type' },
                         backButton: { visible: true },
@@ -91,7 +105,12 @@ const routes = {
 export default function startApp() {
     Navigation.events().registerAppLaunchedListener(() => {
         Navigation.setRoot({
-            root: routes,
+            root: {
+                stack: {
+                    id: 'root',
+                    children: [tabs],
+                },
+            },
         });
     });
 }

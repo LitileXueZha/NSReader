@@ -3,6 +3,7 @@ import {
     View,
     Text,
     Button,
+    ScrollView,
 } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 import { ThemeContext } from './themes';
@@ -22,11 +23,11 @@ export default function API(props) {
         });
     };
     return (
-        <View>
+        <ScrollView>
             <Text>API</Text>
             <Button title="主题" onPress={onChange} />
             <Text>{JSON.stringify(ctx.theme, null, 4)}</Text>
             <Button title="背景" onPress={onBackgroundChange} />
-        </View>
+        </ScrollView>
     );
 }
