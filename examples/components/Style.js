@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import React, { useContext } from 'react';
 import { View, Text } from 'react-native';
 
@@ -62,7 +63,7 @@ export function StyleText(props) {
     const themeStyles = {
         color: fontColor,
         lineHeight: fontHeight,
-        fontSize: size === 'small' ? fontSize : fontSizeSmall,
+        fontSize: size === 'small' ? fontSizeSmall : fontSize,
     };
 
     return (
@@ -71,3 +72,35 @@ export function StyleText(props) {
         </Text>
     );
 }
+
+function createStyleTextHeader(level) {
+    return (props) => {
+        const {
+            style,
+            children,
+            ...restProps
+        } = props;
+        const ctx = useContext(ThemeContext);
+        const {
+            fontSize,
+            fontHeight,
+            fontWeight,
+            marginBottom,
+        } = ctx.theme[level];
+        const themeStyles = {
+            color: ctx.theme.fontColorHead,
+            fontSize,
+            lineHeight: fontHeight,
+            fontWeight,
+            marginBottom,
+        };
+        return (
+            <StyleText style={[themeStyles, style]} {...restProps}>
+                {children}
+            </StyleText>
+        );
+    };
+}
+
+export const StyleTextH1 = createStyleTextHeader('h1');
+export const StyleTextH2 = createStyleTextHeader('h2');

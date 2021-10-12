@@ -19,7 +19,7 @@ Navigation.setDefaultOptions({
         animate: false,
         animateTabSelection: false,
         tabsAttachMode: 'onSwitchToTab',
-        borderColor: themes.dark.borderColor,
+        borderColor: themes.main.borderColor,
         borderWidth: StyleSheet.hairlineWidth,
         preferLargeIcons: true,
     },

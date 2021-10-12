@@ -6,6 +6,7 @@ import {
     BORDER,
     BLACK_BRIGHT,
     WHITE_DARK,
+    BLACK_DARK,
 } from './colors.js';
 import typo from './typography.js';
 import $ev from '../utils/Event.js';
@@ -20,6 +21,7 @@ export const themes = {
         fontColor: BLACK,
         borderColor: BORDER,
         fontColorSecond: BLACK_BRIGHT,
+        fontColorHead: BLACK_DARK,
     },
     dark: {
         ...typo,
@@ -27,23 +29,30 @@ export const themes = {
         fontColor: WHITE,
         borderColor: BORDER,
         fontColorSecond: WHITE_DARK,
+        fontColorHead: WHITE,
     },
 };
 export const ThemeContext = React.createContext({
     theme: themes.main,
-    setTheme: () => {},
 });
+
+/** Current theme type of APP */
+const AppTheme = {
+    current: 'main',
+};
 
 export default class ThemeProvider extends Component {
     constructor(props) {
         super(props);
         this.state = {
             theme: themes[props.type],
-            setTheme: this.setTheme,
         };
     }
 
     componentDidMount() {
+        if (this.props.type !== AppTheme.current) {
+            this.setTheme(AppTheme.current);
+        }
         $ev.on('themechange', this.setTheme);
     }
 
@@ -52,17 +61,17 @@ export default class ThemeProvider extends Component {
     }
 
     setTheme = (type) => {
+        const { componentId } = this.props;
         const theme = themes[type];
         const { background } = theme;
-        // 更新当前组件
-        Navigation.mergeOptions('api', {
-            layout: { componentBackgroundColor: background },
+
+        this.setState({ theme }, () => {
+            // 更新当前组件
+            Navigation.mergeOptions(componentId, {
+                layout: { componentBackgroundColor: background },
+            });
+            AppTheme.current = type;
         });
-        // 设置全局（对当前组件无效）
-        Navigation.setDefaultOptions({
-            layout: { componentBackgroundColor: background },
-        });
-        this.setState({ theme });
     }
 
     render() {
@@ -78,7 +87,7 @@ export function registerTheme(ScreenComponent) {
     // eslint-disable-next-line arrow-body-style
     return () => (props) => {
         return (
-            <ThemeProvider type="main">
+            <ThemeProvider type="main" {...props}>
                 <ScreenComponent {...props} />
             </ThemeProvider>
         );
