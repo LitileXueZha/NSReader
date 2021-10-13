@@ -8,8 +8,7 @@ import {
     WHITE_DARK,
     BLACK_DARK,
 } from './colors.js';
-// TODO: 将排版从主题中移除
-import typo from './typography.js';
+import TYPO from './typography.js';
 import $ev from '../utils/Event.js';
 
 /**
@@ -17,7 +16,6 @@ import $ev from '../utils/Event.js';
  */
 export const themes = {
     main: {
-        ...typo,
         id: 'main',
         background: WHITE,
         fontColor: BLACK,
@@ -26,7 +24,6 @@ export const themes = {
         fontColorHead: BLACK_DARK,
     },
     dark: {
-        ...typo,
         id: 'dark',
         background: BLACK,
         fontColor: WHITE,
@@ -37,6 +34,7 @@ export const themes = {
 };
 export const ThemeContext = React.createContext({
     theme: themes.main,
+    typo: TYPO.normal,
 });
 
 /** Current theme type of APP */
@@ -49,6 +47,7 @@ export default class ThemeProvider extends Component {
         super(props);
         this.state = {
             theme: themes[props.type],
+            typo: TYPO.normal,
         };
     }
 

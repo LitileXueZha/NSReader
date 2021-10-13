@@ -4,27 +4,6 @@ import { View, Text } from 'react-native';
 
 import { ThemeContext } from '../themes';
 
-export default function Style(props) {
-    const {
-        component: C,
-        style,
-        children,
-        ...restProps
-    } = props;
-    const ctx = useContext(ThemeContext);
-
-    return (
-        <C style={[ctx.theme, style]} {...restProps}>
-            {children}
-        </C>
-    );
-}
-
-function HOC(Component) {
-    return (props) => <Style component={Component} {...props} />;
-}
-
-// export const StyleView = HOC(View);
 export function StyleView(props) {
     const {
         style,
@@ -32,7 +11,7 @@ export function StyleView(props) {
         size, ...restProps
     } = props;
     const ctx = useContext(ThemeContext);
-    const { margin, padding } = ctx.theme;
+    const { margin, padding } = ctx.typo;
     const themeStyles = {
         marginTop: margin,
         marginBottom: margin,
@@ -54,12 +33,12 @@ export function StyleText(props) {
         ...restProps
     } = props;
     const ctx = useContext(ThemeContext);
+    const { fontColor } = ctx.theme;
     const {
-        fontColor,
         fontHeight,
         fontSize,
         fontSizeSmall,
-    } = ctx.theme;
+    } = ctx.typo;
     const themeStyles = {
         color: fontColor,
         lineHeight: fontHeight,
@@ -86,7 +65,7 @@ function createStyleTextHeader(level) {
             fontHeight,
             fontWeight,
             marginBottom,
-        } = ctx.theme[level];
+        } = ctx.typo[level];
         const themeStyles = {
             color: ctx.theme.fontColorHead,
             fontSize,

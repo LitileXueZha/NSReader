@@ -19,13 +19,12 @@ import { ThemeContext } from './themes';
  */
 export default class Typography extends Component {
     render() {
-        const { theme } = this.context;
+        const { theme, typo } = this.context;
         const {
-            goldRatio,
-            margin,
             fontSizeSmall,
             fontColorSecond,
         } = theme;
+        const { goldRatio, margin } = typo;
         return (
             <ScrollView>
                 <StyleView style={{ marginTop: 0 }}>
@@ -34,7 +33,7 @@ export default class Typography extends Component {
                     <StyleText style={{ fontSize: fontSizeSmall, color: fontColorSecond }}>
                         2021/10/12
                     </StyleText>
-                    <StyleText>
+                    <StyleText style={{ marginTop: margin * goldRatio }}>
                         Lorem ipsum dolor sit amet consectetur adipisicing elit.
                         Possimus qui nemo molestiae incidunt beatae numquam explicabo culpa, vitae corporis omnis?
                         Quas soluta iste culpa molestiae, veniam nam id molestias a?

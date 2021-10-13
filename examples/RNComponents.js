@@ -10,20 +10,16 @@ import {
 import { Navigation } from 'react-native-navigation';
 import { ThemeContext } from './themes';
 import { Icon, StyleText } from './components';
-import TYPO from './themes/typography.js';
+import { rnVersion } from './utils';
 import RNActivityIndicator from './pages/RNActivityIndicator.js';
 
 const rcList = [
     RNActivityIndicator,
 ];
-const rnVersion = () => {
-    const { major, minor, patch } = Platform.constants.reactNativeVersion;
-    return `${major}.${minor}.${patch}`;
-};
 
 export default function Components(props) {
     const ctx = useContext(ThemeContext);
-    const { theme } = ctx;
+    const { theme, typo } = ctx;
 
     const onNavigate = (id) => {
         Navigation.push('root', {
@@ -34,7 +30,12 @@ export default function Components(props) {
         const onPress = () => onNavigate(item.ID);
         return (
             <Pressable onPress={onPress} key={item.name}>
-                <View style={[{ borderColor: theme.borderColor }, css.rcitem]}>
+                <View
+                    style={[
+                        { borderColor: theme.borderColor, padding: typo.margin / typo.goldRatio },
+                        css.rcitem,
+                    ]}
+                >
                     <StyleText style={css.rcitemText}>{item.name.substr(2)}</StyleText>
                     <Icon name="arrowForward" />
                 </View>
@@ -43,13 +44,14 @@ export default function Components(props) {
     });
     return (
         <ScrollView>
-            <StyleText style={[{ color: theme.fontColorSecond }, css.ver]} size="small">
+            <StyleText style={[{ color: theme.fontColorSecond, paddingRight: typo.margin }, css.ver]} size="small">
                 ver_{rnVersion()}
             </StyleText>
             <View style={css.global}>
                 {renderList(rcList)}
                 <Text>Components</Text>
                 <Text>{JSON.stringify(theme, null, 4)}</Text>
+                <Text>{JSON.stringify(typo, null, 4)}</Text>
             </View>
             <View style={{ height: 400 }}></View>
         </ScrollView>
@@ -58,14 +60,12 @@ export default function Components(props) {
 
 const css = StyleSheet.create({
     ver: {
-        paddingRight: TYPO.margin,
         textAlign: 'right',
     },
     rcitem: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: TYPO.margin / TYPO.goldRatio,
         borderTopWidth: StyleSheet.hairlineWidth,
     },
     rcitemText: {
