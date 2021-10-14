@@ -1,5 +1,5 @@
 const BASE_SPACE = 10;
-const GOLD_RATIO = 0.618;
+export const GOLD_RATIO = 0.618;
 const FONT_SIZE = 16;
 const FONT_HEIGHT = 20;
 
