@@ -12,9 +12,11 @@ import { ThemeContext } from './themes';
 import { Icon, StyleText } from './components';
 import { rnVersion } from './utils';
 import RNActivityIndicator from './pages/RNActivityIndicator.js';
+import RNButton from './pages/RNButton.js';
 
 const rcList = [
     RNActivityIndicator,
+    RNButton,
 ];
 
 export default function Components(props) {

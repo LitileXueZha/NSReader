@@ -7,6 +7,8 @@ import {
     BLACK_BRIGHT,
     WHITE_DARK,
     BLACK_DARK,
+    BLUE,
+    BLUE_BRIGHT,
 } from './colors.js';
 import TYPO from './typography.js';
 import $ev from '../utils/Event.js';
@@ -22,6 +24,7 @@ export const themes = {
         borderColor: BORDER,
         fontColorSecond: BLACK_BRIGHT,
         fontColorHead: BLACK_DARK,
+        linkColor: BLUE,
     },
     dark: {
         id: 'dark',
@@ -30,6 +33,7 @@ export const themes = {
         borderColor: BORDER,
         fontColorSecond: WHITE_DARK,
         fontColorHead: WHITE,
+        linkColor: BLUE_BRIGHT,
     },
 };
 export const ThemeContext = React.createContext({

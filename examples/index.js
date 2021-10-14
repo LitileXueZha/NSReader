@@ -1,13 +1,15 @@
 import { StyleSheet, Dimensions } from 'react-native';
 import { Navigation } from 'react-native-navigation';
-import Components from './RNComponents.js';
-import API from './API.js';
-import Typography from './Typography.js';
-import { registerTheme, themes } from './themes';
+import { themes } from './themes';
 import TYPO from './themes/typography.js';
 import iconTab from '../assets/ic_tab.png';
 import iconTabSelected from '../assets/ic_tab_selected.png';
-import './pages/RNActivityIndicator.js';
+import {
+    TABAPI,
+    TABComponents,
+    TABTypography,
+} from './IDSymbols.js';
+import registerRoutes from './routes.js';
 
 const APP_ROOT = 'root'; // Root stack id
 const APP_NAV_DURATION = 300; // Screen switch animations duration
@@ -85,8 +87,8 @@ const APP_TABS = {
     bottomTabs: {
         children: [{
             component: {
-                id: 'api',
-                name: 'api',
+                id: TABAPI,
+                name: TABAPI,
                 options: {
                     bottomTab: {
                         text: 'API',
@@ -97,8 +99,8 @@ const APP_TABS = {
             },
         }, {
             component: {
-                id: 'com',
-                name: 'com',
+                id: TABComponents,
+                name: TABComponents,
                 options: {
                     bottomTab: {
                         text: 'Components',
@@ -109,8 +111,8 @@ const APP_TABS = {
             },
         }, {
             component: {
-                id: 'typ',
-                name: 'typ',
+                id: TABTypography,
+                name: TABTypography,
                 options: {
                     topBar: {
                         visible: true,
@@ -131,10 +133,7 @@ const APP_TABS = {
 };
 
 export default function startApp() {
-    // Register tabs
-    Navigation.registerComponent('com', registerTheme(Components), () => Components);
-    Navigation.registerComponent('api', registerTheme(API), () => API);
-    Navigation.registerComponent('typ', registerTheme(Typography), () => Typography);
+    registerRoutes();
     // Set defaults
     Navigation.setDefaultOptions(APP_DEFAULT);
 

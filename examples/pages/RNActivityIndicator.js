@@ -7,15 +7,13 @@ import {
     ActivityIndicator,
     Dimensions,
 } from 'react-native';
-import { Navigation } from 'react-native-navigation';
-import { registerTheme, ThemeContext } from '../themes';
+import { ThemeContext } from '../themes';
 import { StyleText, StyleTextH2 } from '../components/Style.js';
 import PageContainer from '../components/PageContainer.js';
 import { ORANGE } from '../themes/colors.js';
 import { GOLD_RATIO } from '../themes/typography.js';
 import ReferenceProp from '../components/ReferenceProp.js';
 
-const ID = Symbol('RNActivityIndicator');
 const DATA_PROPS = [{
     id: 'animating',
     default: 'true',
@@ -53,18 +51,13 @@ export default function RNActivityIndicator(props) {
         </PageContainer>
     );
 }
-RNActivityIndicator.ID = ID;
 
 const css = StyleSheet.create({
     demo: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 10,
-        marginBottom: 10,
+        marginHorizontal: 10,
         borderRadius: 2,
-        height: (Dimensions.get('screen').width - 20) * GOLD_RATIO,
-        borderWidth: 1,
+        minHeight: (Dimensions.get('screen').width - 20) * GOLD_RATIO,
     },
 });
-
-Navigation.registerComponent(ID, registerTheme(RNActivityIndicator), () => RNActivityIndicator);
