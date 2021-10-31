@@ -4,3 +4,4 @@ export const TABTypography = 'typ';
 
 export const IDActivityIndicator = Symbol('ActivityIndicator');
 export const IDButton = Symbol('Button');
+export const IDFlatList = Symbol('FlatList');

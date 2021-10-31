@@ -21,6 +21,7 @@
     "rules": {
         "indent": ["error", 4],
         "no-restricted-syntax": "off",
+        "no-use-before-define": ["error", {"functions": false}],
         "react/jsx-filename-extension": "off",
         "react/jsx-indent": ["error", 4],
         "react/jsx-indent-props": ["error", 4],
@@ -29,6 +30,7 @@
         "react/jsx-props-no-spreading": "warn",
         "react/no-unused-state": "off",
         "import/extensions": ["warn", "ignorePackages"],
-        "import/no-extraneous-dependencies": ["off", {"packageDir": ["./", "../"]}]
+        "import/no-extraneous-dependencies": ["off", {"packageDir": ["./", "../"]}],
+        "jsx-a11y/anchor-is-valid": "off"
     }
 }

@@ -12,7 +12,7 @@ import {
 import registerRoutes from './routes.js';
 
 const APP_ROOT = 'root'; // Root stack id
-const APP_NAV_DURATION = 300; // Screen switch animations duration
+const APP_NAV_DURATION = 250; // Screen switch animations duration
 const APP_WINDOW_WIDTH = Dimensions.get('window').width;
 /**
  * The app default options
@@ -52,7 +52,7 @@ const APP_DEFAULT = {
                 exit: {
                     translationX: {
                         from: 0,
-                        to: -APP_WINDOW_WIDTH,
+                        to: -APP_WINDOW_WIDTH / 8,
                         duration: APP_NAV_DURATION,
                     },
                 },
@@ -62,7 +62,7 @@ const APP_DEFAULT = {
             content: {
                 enter: {
                     translationX: {
-                        from: -APP_WINDOW_WIDTH,
+                        from: -APP_WINDOW_WIDTH / 8,
                         to: 0,
                         duration: APP_NAV_DURATION,
                     },
