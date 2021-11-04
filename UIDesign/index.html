@@ -24,6 +24,10 @@
             padding: 0;
             list-style: none;
         }
+        a[navonly] {
+            color: inherit;
+            text-decoration: none;
+        }
 
         .s-bg { background: #fff; }
         .s-width { max-width: 375px; }
@@ -44,6 +48,7 @@
                 0px 1px 3px 0px rgb(0 0 0 / 12%);
         }
         .s-hidden { display: none; }
+        .s-pm { background: #FFA733; }
     </style>
     <!-- %ssr_livereload% -->
 </head>
@@ -76,7 +81,7 @@
             }
         </style>
         <div class="page">
-            <h1 id="story" class="s-head">阅读</h1>
+            <h1 id="story" class="s-head"><a href="#story">阅读</a></h1>
             <div class="s-width s-bg s-hidden" style="overflow: auto">
                 <style>
                     .topbar {
@@ -89,7 +94,7 @@
                         box-shadow: 0 2px 4px rgb(0 0 0 / 20%), 0 -1px 0 rgb(0 0 0 / 2%);
                     }
                 </style>
-                <p>页面下拉刷新</p>
+                <p class="s-pm">页面下拉刷新</p>
                 <nav class="topbar">
                     <div class="s-icon"></div>
                     <div class="loading">加载本地文件...</div>
@@ -168,33 +173,41 @@
                                 margin-top: 4px;
                             }
                         </style>
-                        <h3 class="title">title - Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus ex reiciendis quibusdam.</h3>
-                        <p class="item-more">
-                            <time class="pubDate" datetime="2021">02:48</time>
-                            <span class="icon-from"></span>
-                        </p>
+                        <a href="/story.html#storydetail" navonly>
+                            <h3 class="title">title - Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus ex reiciendis quibusdam.</h3>
+                            <p class="item-more">
+                                <time class="pubDate" datetime="2021">02:48</time>
+                                <span class="icon-from"></span>
+                            </p>                        
+                        </a>
                     </li>
                     <li class="item">
-                        <h3 class="title">标题 - 发生了什么</h3>
-                        <p class="item-more">
-                            <time class="pubDate" datetime="2021">10/31</time>
-                            <span class="icon-from"></span>
-                        </p>
+                        <a href="/story.html#storydetail" navonly>
+                            <h3 class="title">标题 - 发生了什么</h3>
+                            <p class="item-more">
+                                <time class="pubDate" datetime="2021">10/31</time>
+                                <span class="icon-from"></span>
+                            </p>
+                        </a>
                     </li>
                     <li class="item read">
-                        <h3 class="title">Readed story from one rss!</h3>
-                        <p class="item-more">
-                            <time class="pubDate" datetime="2021">2020/10/31</time>
-                            <span class="icon-from"></span>
-                        </p>
+                        <a href="/story.html#storydetail" navonly>
+                            <h3 class="title">Readed story from one rss!</h3>
+                            <p class="item-more">
+                                <time class="pubDate" datetime="2021">2020/10/31</time>
+                                <span class="icon-from"></span>
+                            </p>
+                        </a>
                     </li>
                     <li class="item">
-                        <h3 class="title">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</h3>
-                        <p class="description">description - Lorem ipsum dolor sit amet consectetur adipisicing elit. Itaque deleniti error asperiores corrupti quae esse! Voluptatem modi quas maiores quidem aliquid, reprehenderit odit, tenetur officia, animi corrupti dolores repellat quia?</p>
-                        <p class="item-more">
-                            <time class="pubDate" datetime="2021">2021/06/31</time>
-                            <span class="icon-from"></span>
-                        </p>
+                        <a href="/story.html#storydetail" navonly>
+                            <h3 class="title">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</h3>
+                            <p class="description">description - Lorem ipsum dolor sit amet consectetur adipisicing elit. Itaque deleniti error asperiores corrupti quae esse! Voluptatem modi quas maiores quidem aliquid, reprehenderit odit, tenetur officia, animi corrupti dolores repellat quia?</p>
+                            <p class="item-more">
+                                <time class="pubDate" datetime="2021">2021/06/31</time>
+                                <span class="icon-from"></span>
+                            </p>
+                        </a>
                     </li>
                 </ul>
 
@@ -208,10 +221,10 @@
                 <div class="end">End of Story 结尾了</div>
             </div>
 
-            <h1 id="rss" class="s-head">RSS源</h1>
+            <h1 id="rss" class="s-head"><a href="#rss">RSS源</a></h1>
             <div class="s-width s-bg s-shadow s-hidden" style="overflow: auto;background: #e3e3e3;">
                 <section class="card" style="margin: 0">
-                    <p>页面下拉刷新</p>
+                    <p class="s-pm">页面下拉刷新</p>
                     <p style="text-align: center;">
                         最后更新于
                         <br/>
@@ -219,7 +232,7 @@
                     </p>
                     <p>
                         <span>共10项</span>
-                        <button style="float: right;">添加RSS源</button>
+                        <a href="/rss.html#new"><button style="float: right;">添加RSS源</button></a>
                     </p>
                 </section>
 
@@ -258,56 +271,62 @@
                     <div class="s-icon"></div>
                     <div>空空如也</div>
                 </section>
-                <section class="card">
-                    <div class="card-body">
-                        <div class="card-content">
-                            <h3 class="title">channel.title</h3>
-                            <time class="pubDate lastBuildDate" datetime="2021">14:43</time>
+                <a href="/rss.html#edit" navonly>
+                    <section class="card">
+                        <div class="card-body">
+                            <div class="card-content">
+                                <h3 class="title">channel.title</h3>
+                                <time class="pubDate lastBuildDate" datetime="2021">14:43</time>
+                            </div>
+                            <div class="favicon">img</div>
                         </div>
-                        <div class="favicon"></div>
-                    </div>
-                    <p class="description">channel.description</p>
-                    <!-- <p class="description">写代码是热爱，写到世界充满爱！ 养猪 @justjustjustcc , working on @rss3_ , https://t.co/AmSK1TsKcj - Made with love by RSSHub(https://github.com/DIYgod/RSSHub)</p> -->
-                    <div class="actions">
-                        <button>启用</button>
-                        <button>快捷功能2</button>
-                    </div>
-                </section>
-                <section class="card">
-                    <div class="card-body">
-                        <div class="card-content">
-                            <h3 class="title">RSS源标题 - 可修改</h3>
-                            <time class="pubDate lastBuildDate" datetime="2021">2021/10/31</time>
+                        <p class="description">channel.description</p>
+                        <!-- <p class="description">写代码是热爱，写到世界充满爱！ 养猪 @justjustjustcc , working on @rss3_ , https://t.co/AmSK1TsKcj - Made with love by RSSHub(https://github.com/DIYgod/RSSHub)</p> -->
+                        <div class="actions">
+                            <button>启用</button>
+                            <button>快捷功能2</button>
                         </div>
-                        <div class="favicon"></div>
-                    </div>
-                    <p class="description">RSS源描述。从订阅链接中读取，也许很长很长，但应该不会超过2行</p>
-                    <div class="actions">
-                        <button>禁用</button>
-                        <button>快捷功能2</button>
-                    </div>
-                </section>
-                <section class="card disabled">
-                    <div class="card-body">
-                        <div class="card-content">
-                            <h3 class="title">Disabled - Lorem ipsum, dolor sit ame</h3>
-                            <time class="pubDate lastBuildDate" datetime="2021">10/05</time>
+                    </section>
+                </a>
+                <a href="/rss.html#edit" navonly>
+                    <section class="card">
+                        <div class="card-body">
+                            <div class="card-content">
+                                <h3 class="title">RSS源标题 - 可修改</h3>
+                                <time class="pubDate lastBuildDate" datetime="2021">2021/10/31</time>
+                            </div>
+                            <div class="favicon">img</div>
                         </div>
-                        <div class="favicon" style="background: chocolate;"></div>
-                    </div>
-                    <p class="description">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Cum odio, nisi consequatur amet enim voluptatum similique libero earum rerum tempora, voluptates a nesciunt in unde alias, ad rem consectetur laudantium.</p>
-                    <div class="actions">
-                        <button>启用</button>
-                        <button>快捷功能2</button>
-                    </div>
-                </section>
+                        <p class="description">RSS源描述。从订阅链接中读取，也许很长很长，但应该不会超过2行</p>
+                        <div class="actions">
+                            <button>禁用</button>
+                            <button>快捷功能2</button>
+                        </div>
+                    </section>
+                </a>
+                <a href="/rss.html#edit" navonly>
+                    <section class="card disabled">
+                        <div class="card-body">
+                            <div class="card-content">
+                                <h3 class="title">Disabled - Lorem ipsum, dolor sit ame</h3>
+                                <time class="pubDate lastBuildDate" datetime="2021">10/05</time>
+                            </div>
+                            <div class="favicon" style="background: chocolate;">color</div>
+                        </div>
+                        <p class="description">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Cum odio, nisi consequatur amet enim voluptatum similique libero earum rerum tempora, voluptates a nesciunt in unde alias, ad rem consectetur laudantium.</p>
+                        <div class="actions">
+                            <button disabled>启用</button>
+                            <button disabled>快捷功能2</button>
+                        </div>
+                    </section>
+                </a>
                 <section class="card learn">
                     <div class="s-icon"></div>
                     了解如何添加RSS源
                 </section>
             </div>
 
-            <h1 id="settings" class="s-head">设置</h1>
+            <h1 id="settings" class="s-head"><a href="#settings">设置</a></h1>
             <div class="s-width s-bg s-hidden" style="overflow: auto;background: #e3e3e3;">
                 <style>
                     .settings {
@@ -319,8 +338,6 @@
                         padding: 12px 12px 12px 0;
                         display: flex;
                         align-items: center;
-                    }
-                    .settings .item:last-of-type {
                         border-bottom: none;
                     }
                     .settings .body {

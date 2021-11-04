@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FFA733" />
+    <title>NSReader</title>
+    <!-- <link rel="stylesheet" href="https://unpkg.com/normalize.css@8.0.1/normalize.css"> -->
+    <style>
+        /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
+        html{-webkit-text-size-adjust:100%;line-height:1.15}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{-webkit-box-sizing:content-box;box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color:transparent}abbr[title]{border-bottom:none;text-decoration:underline;-webkit-text-decoration:underline dotted;text-decoration:underline dotted}b,strong{font-weight:bolder}code,kbd,samp{font-family:monospace,monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}img{border-style:none}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0}button,input{overflow:visible}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:1px dotted ButtonText}fieldset{padding:.35em .75em .625em}legend{-webkit-box-sizing:border-box;box-sizing:border-box;color:inherit;display:table;max-width:100%;padding:0;white-space:normal}progress{vertical-align:baseline}textarea{overflow:auto}[type=checkbox],[type=radio]{-webkit-box-sizing:border-box;box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}details{display:block}summary{display:list-item}[hidden],template{display:none}
+    </style>
+    <style>
+        html, body {
+            height: 100%;
+            background: #e3e3e3;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+        p { margin: 0; }
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        a[navonly] {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .s-bg { background: #fff; }
+        .s-width { max-width: 375px; }
+        .s-height { height: 667px; }
+        .s-height-bottom { height: 56px; }
+        .s-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: #bbb;
+            border-radius: 50%;
+            vertical-align: middle;
+        }
+        .s-head { margin: 40px 0 0 0; }
+        .s-shadow {
+            box-shadow: 0px 2px 1px -1px rgb(0 0 0 / 20%),
+                0px 1px 1px 0px rgb(0 0 0 / 14%),
+                0px 1px 3px 0px rgb(0 0 0 / 12%);
+        }
+        .s-hidden { display: none; }
+        .s-pm { background: #FFA733; }
+    </style>
+    <!-- %ssr_livereload% -->
+</head>
+<body>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            height: 100%;
+            box-shadow: 0px 2px 1px -1px rgb(0 0 0 / 20%),
+                0px 1px 1px 0px rgb(0 0 0 / 14%),
+                0px 1px 3px 0px rgb(0 0 0 / 12%);
+        }
+    </style>
+    <div class="container s-width">
+        <style>
+            .page {
+                flex: 1;
+                overflow-y: auto;
+                scroll-behavior: smooth;
+                -webkit-overflow-scrolling: touch;
+            }
+            @media screen and (min-width: 667px) {
+                .page { width: 400px; }
+            }
+            :target,
+            :target + div {
+                display: block;
+            }
+        </style>
+        <div class="page">
+            <h1 id="new" class="s-head"><a href="#new">添加RSS源</a></h1>
+            <div class="s-width s-bg s-hidden" style="overflow: auto">
+                <style>
+                    .topbar {
+                        display: flex;
+                        align-items: center;
+                        height: 24px;
+                        padding: 10px;
+                        /* margin-bottom: 20px; */
+                        border-bottom: 1px solid #ddd;
+                    }
+                </style>
+                <nav class="topbar">
+                    <div class="s-icon"></div>
+                    <div class="loading" style="flex: 1">添加RSS源</div>
+                </nav>
+                <div class="s-pm">
+                    <p>1. 左上角返回</p>
+                    <p>2. 保存成功后返回</p>
+                </div>
+
+                <style>
+                    .rss {
+                        margin: 10px;
+                    }
+                    .form-item {
+                        display: flex;
+                        margin-bottom: 20px;
+                    }
+                    .form-label {
+                        width: 100px;
+                    }
+                    .form-value {
+                        flex: 1;
+                        text-align: right;
+                        word-break: break-all;
+                    }
+                    .form-value.disabled {
+                        color: #ccc;
+                    }
+                    .form-value.text {
+                        color: #666;
+                    }
+                    .form-value.tips {
+                        color: #666;
+                        font-size: 12px;
+                    }
+                    .divider {
+                        border-bottom: 1px solid #ddd;
+                    }
+                    .favicon {
+                        width: 48px;
+                        height: 48px;
+                        background: #bbb;
+                    }
+                </style>
+                <form action="" class="rss">
+                    <div class="form-item">
+                        <label class="form-label" for="url">URL</label>
+                        <textarea name="" id="url" rows="4" class="form-value" placeholder="粘贴输入到此"></textarea>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label"></label>
+                        <div class="form-value">
+                            <button>保存</button>
+                        </div>
+                    </div>
+                    <div class="form-item">
+                        <div class="form-label"></div>
+                        <div class="form-value tips">
+                            <p>下载RSS源</p>
+                            <p>http.statusText</p>
+                            <p>OK</p>
+                            <p>Not Found</p>
+                            <p>解析源文件格式</p>
+                            <p>RSS 2.0</p>
+                            <p>Atom 1.0</p>
+                            <p>暂不支持</p>
+                        </div>
+                    </div>
+                </form>
+                <div class="divider"></div>
+
+                <style>
+                    .result {
+                        margin: 30px 0;
+                        text-align: center;
+                    }
+                </style>
+                <section class="result">
+                    <div class="s-icon"></div>
+                    <p class="result-text">保存成功</p>
+                    <p class="result-text failed">出现了点小问题</p>
+                    <p class="result-text">
+                        <a href="#support-list">查看当前支持的RSS源格式</a>
+                    </p>
+                    <p class="result-text">
+                        <button>详细信息</button>
+                    </p>
+                    <div class="s-pm">
+                        <p>弹窗提示解析失败的详细信息：</p>
+                        <p>缺少 title</p>
+                        <p>缺少 date</p>
+                        <p>缺少 description</p>
+                        <p>缺少 story.title</p>
+                        <p>缺少 story.date</p>
+                        <p>缺少 story.description</p>
+                    </div>
+                </section>
+            </div>
+
+            <h1 id="edit" class="s-head"><a href="#edit">编辑</a></h1>
+            <div class="s-width s-bg s-hidden" style="overflow: auto;background: #e3e3e3;">
+                <style>
+                    .topbar {
+                        display: flex;
+                        align-items: center;
+                        height: 24px;
+                        padding: 10px;
+                        /* margin-bottom: 20px; */
+                        border-bottom: 1px solid #ddd;
+                    }
+                </style>
+                <nav class="topbar s-bg">
+                    <div class="s-icon"></div>
+                    <div class="loading" style="flex: 1">编辑RSS源</div>
+                    <button>保存</button>
+                    <select style="width: 24px;height: 24px;">
+                        <option value="" disabled>菜单</option>
+                        <option value="">菜单项1-查看来源网站</option>
+                        <option value="">菜单项2-删除</option>
+                    </select>
+                </nav>
+                <div class="s-pm">
+                    <p>1. 左上角返回</p>
+                    <p>2. 下拉刷新。标题项已修改后不做改变</p>
+                    <p>3. 右上角危险菜单项“删除”，二次弹窗</p>
+                </div>
+
+                <style>
+                    .rss.edit {
+                        margin: 0;
+                    }
+                    .rss.edit .form-item {
+                        padding: 16px 10px;
+                        margin-bottom: 0;
+                        border-bottom: 1px solid #ddd;
+                    }
+                    .rss.edit .form-value {
+                        text-align: right;
+                    }
+                </style>
+                <form action="" class="rss edit s-bg">
+                    <div class="form-item" style="display: none;">
+                        <label class="form-label" for="id">id</label>
+                        <span class="form-value disabled">0001</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label" for="url">URL</label>
+                        <p class="form-value disabled">https://www.example.com/feeds/index.rss</p>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label" for="title">标题</label>
+                        <input type="text" class="form-value" id="title" placeholder="可修改RSS标题" />
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label" for="active">启用</label>
+                        <div class="form-value">
+                            <input type="checkbox" name="" id="active" checked />
+                        </div>
+                    </div>
+                </form>
+
+                <style>
+                    .section-title {
+                        margin: 60px 10px 10px;
+                        color: #666;
+                    }
+                </style>
+                <p class="section-title">更多信息</p>
+                <div class="rss edit s-bg">
+                    <div class="form-item">
+                        <label class="form-label" for="description">描述</label>
+                        <p class="form-value text">Lorem ipsum dolor sit, amet consectetur adipisicing elit.</p>
+                        <!-- <textarea name="" id="description" rows="4" class="form-value" placeholder="输入">Lorem ipsum dolor sit, amet consectetur adipisicing elit.</textarea> -->
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">图标</label>
+                        <div class="form-value">
+                            <style>
+                                .favicon {
+                                    width: 78px;
+                                    height: 78px;
+                                    background: #bbb;
+                                }
+                            </style>
+                            <img class="favicon" />
+                            <p class="s-pm">默认image.url，没有则引用该域名下的favicon，最后使用随机色</p>
+                        </div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label" for="ttl">更新间隔</label>
+                        <!-- <div class="form-value">
+                            <input type="number" name="" id="ttl" style="text-align: right;" placeholder="默认 60" />
+                            <span>分钟</span>
+                        </div> -->
+                        <p class="form-value text">60分钟/无数据</p>
+                    </div>
+                    <div class="form-item">
+                        <label for="" class="form-label">最后发布于</label>
+                        <p class="form-value text">2021/11/04 21:53</p>
+                    </div>
+                    <div class="form-item">
+                        <label for="" class="form-label">源格式</label>
+                        <p class="form-value text">RSS 2.0 或 Atom 1.0</p>
+                    </div>
+                </div>
+            </div>
+
+            <h1 id="support-list" class="s-head"><a href="#support-list">支持的RSS源格式</a></h1>
+            <div class="s-width s-bg s-shadow s-hidden" style="overflow: auto;background: #e3e3e3;">
+                <style>
+                    .topbar {
+                        display: flex;
+                        align-items: center;
+                        height: 24px;
+                        padding: 10px;
+                        /* margin-bottom: 20px; */
+                        border-bottom: 1px solid #ddd;
+                    }
+                </style>
+                <nav class="topbar s-bg">
+                    <div class="s-icon"></div>
+                    <div class="loading" style="flex: 1">支持的RSS源格式</div>
+                </nav>
+                <div class="s-pm">
+                    <p>1. 左上角返回</p>
+                </div>
+
+                <style>
+                    .format-list .item {
+                        display: flex;
+                        margin-left: 10px;
+                        padding: 10px 10px 10px 0;
+                        border-bottom: 1px solid #ddd;
+                    }
+                    .format-list .format-name {
+                        width: 100px;
+                    }
+                    .format-list .value {
+                        flex: 1;
+                        overflow: hidden;
+                    }
+                    pre { margin: 0; overflow: auto; font-size: 14px; }
+                </style>
+                <p class="section-title">标准</p>
+                <section class="format-list s-bg">
+                    <div class="item">
+                        <div class="format-name">RSS 2.0</div>
+                        <details class="value" open>
+                            <summary style="text-align: right;">展开 <div class="s-icon"></div></summary>
+<pre style="text-align: left;"><code>{
+  "title": "rss.channel.title",
+  "date": "rss.channel[pubDate/lastBuildDate]",
+  "description": "rss.channel.description"
+}</code></pre>
+                        </details>
+                    </div>
+                    <div class="item">
+                        <div class="format-name">Atom 1.0</div>
+                        <details class="value">
+                            <summary style="text-align: right;">展开 <div class="s-icon"></div></summary>
+<pre style="text-align: left;"><code>{
+  "title": "feed.title",
+  "date": "feed.updated",
+  "description": "feed.subtitle"
+}</code></pre>
+                        </details>
+                    </div>
+                </section>
+                <p class="section-title">第三方</p>
+                <div class="s-bg" style="padding: 10px;">
+                    <p>example.org</p>
+                    <p>feed.www.abc.com</p>
+                </div>
+
+                <style>
+                    .help-link {
+                        margin: 10px;
+                        text-align: right;
+                    }
+                </style>
+                <p class="help-link">
+                    <a href="https://github.com/LitileXueZha/NSReader/issues" target="_blank">帮助我们支持更多的RSS源</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
