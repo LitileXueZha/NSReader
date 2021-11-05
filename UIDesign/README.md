@@ -33,3 +33,7 @@ $ node UIDesign/server.js
   UIDesignServer watch '/index.html' +4ms
   UIDesignServer reload +15s
 ```
+
+## Online preview
+
+[https://litilexuezha.github.io/NSReader/UIDesign/](https://litilexuezha.github.io/NSReader/UIDesign/index.html)
