@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FFA733" />
+    <title>NSReader</title>
+    <!-- <link rel="stylesheet" href="https://unpkg.com/normalize.css@8.0.1/normalize.css"> -->
+    <style>
+        /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
+        html{-webkit-text-size-adjust:100%;line-height:1.15}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{-webkit-box-sizing:content-box;box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color:transparent}abbr[title]{border-bottom:none;text-decoration:underline;-webkit-text-decoration:underline dotted;text-decoration:underline dotted}b,strong{font-weight:bolder}code,kbd,samp{font-family:monospace,monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}img{border-style:none}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0}button,input{overflow:visible}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:1px dotted ButtonText}fieldset{padding:.35em .75em .625em}legend{-webkit-box-sizing:border-box;box-sizing:border-box;color:inherit;display:table;max-width:100%;padding:0;white-space:normal}progress{vertical-align:baseline}textarea{overflow:auto}[type=checkbox],[type=radio]{-webkit-box-sizing:border-box;box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}details{display:block}summary{display:list-item}[hidden],template{display:none}
+    </style>
+    <style>
+        html, body {
+            height: 100%;
+            background: #e3e3e3;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+        p { margin: 0; }
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        a[navonly] {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .s-bg { background: #fff; }
+        .s-width { max-width: 375px; }
+        .s-height { height: 667px; }
+        .s-height-bottom { height: 56px; }
+        .s-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: #bbb;
+            border-radius: 50%;
+            vertical-align: middle;
+        }
+        .s-head { margin: 40px 0 0 0; }
+        .s-shadow {
+            box-shadow: 0px 2px 1px -1px rgb(0 0 0 / 20%),
+                0px 1px 1px 0px rgb(0 0 0 / 14%),
+                0px 1px 3px 0px rgb(0 0 0 / 12%);
+        }
+        .s-hidden { display: none; }
+        .s-pm { background: #FFA733; }
+    </style>
+    <!-- %ssr_livereload% -->
+</head>
+<body>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            height: 100%;
+            box-shadow: 0px 2px 1px -1px rgb(0 0 0 / 20%),
+                0px 1px 1px 0px rgb(0 0 0 / 14%),
+                0px 1px 3px 0px rgb(0 0 0 / 12%);
+        }
+    </style>
+    <div class="container s-width">
+        <style>
+            .page {
+                flex: 1;
+                overflow-y: auto;
+                scroll-behavior: smooth;
+                -webkit-overflow-scrolling: touch;
+            }
+            @media screen and (min-width: 667px) {
+                .page { width: 400px; }
+            }
+            :target,
+            :target + div {
+                display: block;
+            }
+        </style>
+        <div class="page">
+            <h1 id="about" class="s-head"><a href="#about">关于</a></h1>
+            <div class="s-width s-shadow s-bg s-hidden" style="overflow: auto;background: #e3e3e3;">
+                <style>
+                    .topbar {
+                        display: flex;
+                        align-items: center;
+                        height: 24px;
+                        padding: 10px;
+                        /* margin-bottom: 20px; */
+                        border-bottom: 1px solid #ddd;
+                    }
+                </style>
+                <nav class="topbar s-bg">
+                    <div class="s-icon"></div>
+                    <div class="loading" style="flex: 1">关于</div>
+                    <div class="s-icon"></div>
+                </nav>
+
+                <style>
+                    .settings {
+                        margin: 10px 0;
+                        background: #fff;
+                    }
+                    .settings .item {
+                        margin-left: 12px;
+                        padding: 12px 12px 12px 0;
+                        display: flex;
+                        align-items: center;
+                        border-bottom: none;
+                    }
+                    .settings .body {
+                        flex: 1;
+                    }
+                    .settings .value {
+                        margin-left: 20px;
+                    }
+                    .settings .tip,
+                    .settings .value {
+                        color: #666;
+                        font-size: 14px;
+                    }
+                </style>
+                <div class="s-pm">
+                    <p>1. 右上角分享 app</p>
+                    <p>2. 检查更新失败时，弹窗提示去 Github Releases 上下载</p>
+                    <p>3. 捐赠重复点击5次后执行</p>
+                </div>
+                <ul class="settings">
+                    <li class="item">
+                        <div class="body">
+                            <p>版本</p>
+                            <p class="tip">build_20201106</p>
+                        </div>
+                        <span class="value">1.3.0</span>
+                    </li>
+                    <li class="item">
+                        <p class="body">开发者</p>
+                        <span class="value">@litilexuezha</span>
+                    </li>
+                </ul>
+                <ul class="settings">
+                    <li class="item">
+                        <p class="body">检查更新</p>
+                        <div class="s-icon"></div>
+                    </li>
+                    <li class="item">
+                        <div class="body">
+                            <p>问题与反馈</p>
+                            <p class="tip">去 Github 上创建 issue</p>
+                        </div>
+                        <div class="s-icon"></div>
+                    </li>
+                    <li class="item">
+                        <div class="body">
+                            <p>捐赠</p>
+                            <p class="tip">盼君兮敢吾羞以</p>
+                        </div>
+                    </li>
+                </ul>
+                <ul class="settings">
+                    <a href="#license" navonly>
+                        <li class="item">
+                            <p class="body">开源许可</p>
+                            <div class="s-icon"></div>
+                        </li>
+                    </a>
+                    <li class="item">
+                        <div class="body">
+                            <p>其它贡献者</p>
+                            <p class="tip">没有他们就没有此应用</p>
+                        </div>
+                        <span class="value">thanks</span>
+                    </li>
+                </ul>
+
+                <!-- <p style="text-align: center;margin: 60px 10px 10px;color: #666;">
+                    NSReader<br/>开源的 RSS 阅读器
+                </p> -->
+            </div>
+
+            <h1 id="more" class="s-head"><a href="#more">更多设置</a></h1>
+            <div class="s-width s-bg s-shadow s-hidden" style="overflow: auto;background: #e3e3e3;">
+                <nav class="topbar s-bg">
+                    <div class="s-icon"></div>
+                    <p>更多设置</p>
+                </nav>
+                <ul class="settings">
+                    <li class="item">
+                        <div class="body">
+                            <p>系统设置</p>
+                            <p class="tip">打开系统应用设置</p>
+                        </div>
+                        <div class="s-icon"></div>
+                    </li>
+                    <li class="item">
+                        <div class="body">
+                            <p>插件</p>
+                            <p class="tip">实验性功能</p>
+                        </div>
+                        <div class="s-icon"></div>
+                    </li>
+                </ul>
+            </div>
+
+            <h1 id="storage" class="s-head"><a href="#storage">存储</a></h1>
+            <div class="s-width s-bg s-hidden" style="overflow: auto;background: #e3e3e3;">
+                <nav class="topbar s-bg">
+                    <div class="s-icon"></div>
+                    <div style="flex: 1">存储设置</div>
+                </nav>
+                <div class="s-pm">
+                    <p>1. 清空数据文件二次弹窗</p>
+                </div>
+                <ul class="settings">
+                    <li class="item">
+                        <div class="body" style="align-self: flex-start;">
+                            <p>空间</p>
+                        </div>
+                        <div class="value"">
+                            <p>可用 5.1G / 总计 56G</p>
+                            <input type="range" name="" id="" min="0" max="100" value="80" disabled>
+                        </div>
+                    </li>
+                    <li class="item">
+                        <div class="body">
+                            <p>缓存</p>
+                            <p class="tip">内容缓存，网站图标缓存等</p>
+                        </div>
+                        <span class="value">300 M</span>
+                    </li>
+                    <li class="item">
+                        <div class="body">
+                            <p>数据文件</p>
+                            <p class="tip">已下载的 RSS 源文件</p>
+                        </div>
+                        <span class="value">12 M</span>
+                    </li>
+                    <li class="item">
+                        <div class="body">
+                            <p>应用配置</p>
+                            <p class="tip">保存的 RSS 源列表，应用设置</p>
+                        </div>
+                        <span class="value">20 K</span>
+                    </li>
+                </ul>
+                <ul class="settings">
+                    <li class="item">
+                        <p class="body">清空缓存</p>
+                        <div class="s-icon"></div>
+                    </li>
+                    <li class="item">
+                        <div class="body">
+                            <p>清空数据文件</p>
+                            <p class="tip">删除数据文件将导致阅读列表为空，且无法再查看早期的 RSS 源内容</p>
+                        </div>
+                        <div class="s-icon value"></div>
+                    </li>
+                </ul>
+            </div>
+
+            <h1 id="license" class="s-head"><a href="#license">开源许可</a></h1>
+            <div class="s-width s-bg s-shadow s-hidden" style="overflow: auto;">
+                <div class="topbar">
+                    <div class="s-icon"></div>
+                    <div style="flex: 1;">开源许可</div>
+                </div>
+                <div class="s-pm">1. 打包使用的第三方库的 LICENSE 文件</div>
+
+                <style>
+                    .part {
+                        padding: 10px;
+                        border-bottom: 1px solid #ddd;
+                    }
+                    .part-title {
+                        font-weight: bold;
+                    }
+                    .license-content {
+                        white-space: pre-line;
+                        font-size: 14px;
+                    }
+                </style>
+                <div class="part">
+                    <p class="part-title">react-native</p>
+                    <p class="license-content">
+                        MIT License
+
+                        Copyright (c) Facebook, Inc. and its affiliates.
+                        
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Rem accusantium recusandae impedit odit sit adipisci eligendi officia saepe dolorum ducimus fugiat iste,
+                        aspernatur officiis, quibusdam corrupti eveniet dicta quasi! Aliquam.
+                    </p>
+                </div>
+                <div class="part">
+                    <p class="part-title">react-native-navigation</p>
+                    <p class="license-content">
+                        MIT License
+
+                        Copyright (c) 2016 Wix.com
+
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Nostrum vero facilis autem commodi repellendus sunt ipsam error dicta. Voluptates,
+                        debitis minima voluptas repellendus tempore ratione dicta sit autem molestias! Consequatur.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
