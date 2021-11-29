@@ -81,6 +81,7 @@
             }
         </style>
         <div class="page">
+            <a href="rss://open?url=https://www.solidot.org/index.rss">deep linking</a>
             <h1 id="story" class="s-head"><a href="#story">阅读</a></h1>
             <div class="s-width s-bg s-hidden" style="overflow: auto">
                 <style>
@@ -94,7 +95,10 @@
                         box-shadow: 0 2px 4px rgb(0 0 0 / 20%), 0 -1px 0 rgb(0 0 0 / 2%);
                     }
                 </style>
-                <p class="s-pm">页面下拉刷新</p>
+                <div class="s-pm">
+                    <p>1. 页面下拉刷新</p>
+                    <p>2. 以社交软件消息式查看列表，最新的显示在最下面，（无法下拉更新了。。）</p>
+                </div>
                 <nav class="topbar">
                     <div class="s-icon"></div>
                     <div class="loading">加载本地文件...</div>
@@ -115,13 +119,23 @@
                     </div>
                     <div class="s-icon"></div>
                 </nav>
-                <form class="topbar" style="height: auto;display: block;margin-top: -10px;">
-                    <h4 style="margin: 0;">筛选</h4>
-                    <input type="checkbox" name="" id="showmore" />
-                    <label for="showmore">显示摘要</label>
-                    <br/>
-                    <input type="checkbox" name="readgroup" id="readgroupall" checked />
-                    <label for="readgroupall">显示已读</label>
+                <form class="topbar" style="height: auto;align-items: flex-start;margin-top: -10px;">
+                    <div style="flex: 1">
+                        <h4 style="margin: 0;">筛选</h4>
+                        <input type="checkbox" name="" id="showmore" />
+                        <label for="showmore">显示摘要</label>
+                        <br/>
+                        <input type="checkbox" name="readgroup" id="readgroupall" checked />
+                        <label for="readgroupall">显示已读</label>
+                        <br/>
+                        <input type="checkbox" name="readgroup" id="today" />
+                        <label for="today">仅显示今天</label>
+                    </div>
+                    <div style="flex: 1">
+                        <h4 style="margin: 0;">排序</h4>
+                        <input type="checkbox" name="" id="newest" />
+                        <label for="newest">最新优先</label>
+                    </div>
                 </form>
 
                 <style>
