@@ -25,6 +25,9 @@ export function StyleView(props) {
     );
 }
 
+/**
+ * @param {import('react-native').TextProps} props
+ */
 export function StyleText(props) {
     const {
         style,

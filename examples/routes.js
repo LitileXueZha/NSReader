@@ -4,21 +4,27 @@ import {
     TABAPI,
     TABComponents,
     TABTypography,
+    IDTestOnly,
     IDActivityIndicator,
     IDButton,
+    IDFlatList,
 } from './IDSymbols.js';
 import API from './API.js';
 import Components from './RNComponents.js';
 import Typography from './Typography.js';
+import TestOnly from './TestOnly.js';
 import RNActivityIndicator from './pages/RNActivityIndicator.js';
 import RNButton from './pages/RNButton.js';
+import RNFlatList from './pages/RNFlatList.js';
 
 export default function registerRoutes() {
     register(TABAPI, API);
     register(TABComponents, Components);
     register(TABTypography, Typography);
+    register(IDTestOnly, TestOnly);
     register(IDActivityIndicator, RNActivityIndicator);
     register(IDButton, RNButton);
+    register(IDFlatList, RNFlatList);
 }
 
 /** Simply register. (reduce code) */

@@ -13,10 +13,12 @@ import { Icon, StyleText } from './components';
 import { rnVersion } from './utils';
 import RNActivityIndicator from './pages/RNActivityIndicator.js';
 import RNButton from './pages/RNButton.js';
+import RNFlatList from './pages/RNFlatList.js';
 
 const rcList = [
     RNActivityIndicator,
     RNButton,
+    RNFlatList,
 ];
 
 export default function Components(props) {

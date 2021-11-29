@@ -75,6 +75,11 @@ export default class ThemeProvider extends Component {
             // 更新当前组件
             Navigation.mergeOptions(componentId, {
                 layout: { componentBackgroundColor: background },
+                bottomTabs: { backgroundColor: background },
+            });
+            Navigation.setDefaultOptions({
+                layout: { componentBackgroundColor: background },
+                bottomTabs: { backgroundColor: background },
             });
             AppTheme.current = type;
         });

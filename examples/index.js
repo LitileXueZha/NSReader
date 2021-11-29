@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, ToastAndroid } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 import { themes } from './themes';
 import TYPO from './themes/typography.js';
@@ -8,6 +8,7 @@ import {
     TABAPI,
     TABComponents,
     TABTypography,
+    IDTestOnly,
 } from './IDSymbols.js';
 import registerRoutes from './routes.js';
 
@@ -20,6 +21,9 @@ const APP_WINDOW_WIDTH = Dimensions.get('window').width;
  * @type {import('react-native-navigation').Options}
  */
 const APP_DEFAULT = {
+    statusBar: {
+        backgroundColor: themes.main.background,
+    },
     topBar: { visible: false },
     layout: {
         componentBackgroundColor: themes.main.background,
@@ -32,6 +36,7 @@ const APP_DEFAULT = {
         borderColor: themes.main.borderColor,
         borderWidth: StyleSheet.hairlineWidth,
         preferLargeIcons: true,
+        titleDisplayMode: 'alwaysShow',
     },
     bottomTab: {
         fontSize: TYPO.normal.fontSizeSmall,
@@ -41,6 +46,7 @@ const APP_DEFAULT = {
     },
     animations: {
         push: {
+            // waitForRender: true,
             content: {
                 enter: {
                     translationX: {
@@ -86,6 +92,18 @@ const APP_DEFAULT = {
 const APP_TABS = {
     bottomTabs: {
         children: [{
+            component: {
+                id: IDTestOnly,
+                name: IDTestOnly,
+                options: {
+                    bottomTab: {
+                        text: 'Test',
+                        icon: iconTab,
+                        selectedIcon: iconTabSelected,
+                    },
+                },
+            },
+        }, {
             component: {
                 id: TABAPI,
                 name: TABAPI,
