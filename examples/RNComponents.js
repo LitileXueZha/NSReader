@@ -8,17 +8,20 @@ import {
     Pressable,
 } from 'react-native';
 import { Navigation } from 'react-native-navigation';
+import Ionicon from 'react-native-vector-icons/Ionicons';
 import { ThemeContext } from './themes';
 import { Icon, StyleText } from './components';
 import { rnVersion } from './utils';
 import RNActivityIndicator from './pages/RNActivityIndicator.js';
 import RNButton from './pages/RNButton.js';
 import RNFlatList from './pages/RNFlatList.js';
+import RNModal from './pages/RNModal.js';
 
 const rcList = [
     RNActivityIndicator,
     RNButton,
     RNFlatList,
+    RNModal,
 ];
 
 export default function Components(props) {
@@ -41,7 +44,8 @@ export default function Components(props) {
                     ]}
                 >
                     <StyleText style={css.rcitemText}>{item.name.substr(2)}</StyleText>
-                    <Icon name="arrowForward" />
+                    <Ionicon name="chevron-forward" size={20} color={theme.fontColor} />
+                    {/* <Icon name="arrowForward" /> */}
                 </View>
             </Pressable>
         );

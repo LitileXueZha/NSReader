@@ -7,3 +7,4 @@ export const IDTestOnly = 'test';
 export const IDActivityIndicator = Symbol('ActivityIndicator');
 export const IDButton = Symbol('Button');
 export const IDFlatList = Symbol('FlatList');
+export const IDModal = Symbol('Modal');

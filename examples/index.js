@@ -1,5 +1,6 @@
 import { StyleSheet, Dimensions, ToastAndroid } from 'react-native';
 import { Navigation } from 'react-native-navigation';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { themes } from './themes';
 import TYPO from './themes/typography.js';
 import iconTab from '../assets/ic_tab.png';
@@ -97,9 +98,11 @@ const APP_TABS = {
                 name: IDTestOnly,
                 options: {
                     bottomTab: {
-                        text: 'Test',
-                        icon: iconTab,
-                        selectedIcon: iconTabSelected,
+                        text: '阅读',
+                        icon: Icon.getImageSourceSync('cafe-outline', 20, themes.main.fontColorSecond),
+                        selectedIcon: Icon.getImageSourceSync('cafe', 20, themes.main.fontColor),
+                        // icon: iconTab,
+                        // selectedIcon: iconTabSelected,
                     },
                 },
             },
@@ -135,9 +138,15 @@ const APP_TABS = {
                     topBar: {
                         visible: true,
                         title: { text: 'Typography' },
-                        subtitle: { text: 'some text for type' },
-                        backButton: { visible: true },
-                        rightButtons: [{ text: 'Menu' }],
+                        // subtitle: { text: 'some text for type' },
+                        backButton: {
+                            visible: true,
+                            icon: Icon.getImageSourceSync('chevron-back', 24, themes.main.fontColor),
+                        },
+                        rightButtons: [{ text: 'Menu1', showAsAction: 'never' },{ text: 'Menu2',id:11, showAsAction: 'never' },{ text: 'Menu23', showAsAction: 'never' }],
+                        elevation: 0,
+                        borderColor: themes.main.borderColor,
+                        borderHeight: StyleSheet.hairlineWidth,
                     },
                     bottomTab: {
                         text: 'Typography',

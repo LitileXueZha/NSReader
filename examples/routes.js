@@ -8,6 +8,7 @@ import {
     IDActivityIndicator,
     IDButton,
     IDFlatList,
+    IDModal,
 } from './IDSymbols.js';
 import API from './API.js';
 import Components from './RNComponents.js';
@@ -16,6 +17,7 @@ import TestOnly from './TestOnly.js';
 import RNActivityIndicator from './pages/RNActivityIndicator.js';
 import RNButton from './pages/RNButton.js';
 import RNFlatList from './pages/RNFlatList.js';
+import RNModal from './pages/RNModal.js';
 
 export default function registerRoutes() {
     register(TABAPI, API);
@@ -25,6 +27,7 @@ export default function registerRoutes() {
     register(IDActivityIndicator, RNActivityIndicator);
     register(IDButton, RNButton);
     register(IDFlatList, RNFlatList);
+    register(IDModal, RNModal);
 }
 
 /** Simply register. (reduce code) */
