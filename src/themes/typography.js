@@ -1,4 +1,4 @@
-const BASE_SPACE = 12;
+export const BASE_SPACE = 12;
 export const GOLD_RATIO = 0.618;
 const FONT_SIZE = 16;
 const FONT_HEIGHT = 20;

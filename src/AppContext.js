@@ -1,9 +1,9 @@
 import React from 'react';
-import { Text } from 'react-native';
 
 import $ev from './utils/Event.js';
 import { themes } from './themes';
 import TYPO from './themes/typography.js';
+import aps from './AppSettings.js';
 
 const defaultValue = {
     theme: themes.main,
@@ -15,7 +15,11 @@ export const AppContext = React.createContext(defaultValue);
 export default class App extends React.PureComponent {
     constructor() {
         super();
-        this.state = defaultValue;
+        this.state = {
+            lang: aps.get('lang') || defaultValue.lang,
+            theme: themes[aps.get('theme')] || defaultValue.theme,
+            typo: defaultValue.typo,
+        };
     }
 
     componentDidMount() {}

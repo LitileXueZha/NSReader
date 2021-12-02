@@ -1,13 +1,3 @@
-import {
-    WHITE,
-    BLACK,
-    BORDER,
-    BLACK_BRIGHT,
-    WHITE_DARK,
-    BLACK_DARK,
-    BLUE,
-    BLUE_BRIGHT,
-} from './colors.js';
 import colors from '@primer/primitives/dist/js/colors';
 import light from '@primer/primitives/dist/js/colors/light.js';
 import dark from '@primer/primitives/dist/js/colors/dark.js';
@@ -25,23 +15,35 @@ export const themes = {
         borderColor: light.border.default,
         fontColorSecond: light.scale.gray[4],
         fontColorHead: '#000000',
-        linkColor: BLUE,
+        linkColor: light.accent.fg,
+        primaryColor: light.scale.orange[4],
 
         /**
          * Bottom tabs is a little darker than background
          */
-        bottomTabsBackground: light.canvas.overlay,
+        bottomTabsBackground: light.canvas.inset,
+        touchHighlight: light.neutral.subtle,
+        touchFeedback: undefined, // on Android
+        bgStoryTopbar: light.canvas.default,
+        bgModalBody: light.canvas.default,
+        // bgDisabled: light.neutral.muted,
     },
     dark: {
         id: 'dark',
-        background: dark.canvas.overlay,
+        background: dark.canvas.default,
         fontColor: dark.fg.default,
         borderColor: dark.border.default,
         fontColorSecond: dark.fg.muted,
-        fontColorHead: WHITE,
-        linkColor: BLUE_BRIGHT,
+        fontColorHead: '#ffffff',
+        linkColor: dark.accent.fg,
+        primaryColor: dark.scale.orange[4],
 
-        bottomTabsBackground: dark.canvas.default,
+        bottomTabsBackground: dark.canvas.inset,
+        touchHighlight: dark.neutral.subtle,
+        touchFeedback: dark.neutral.muted,
+        bgStoryTopbar: dark.scale.gray[7],
+        bgModalBody: dark.scale.gray[7],
+        // bgDisabled: dark.neutral.muted,
     },
 };
 
