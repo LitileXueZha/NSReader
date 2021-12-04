@@ -6,15 +6,24 @@ import {
     TABStory,
     TABRSS,
     TABSettings,
+    IDAbout,
+    IDStorage,
+    IDSettingsMore,
 } from './pages/IDSymbols.js';
 import Story from './pages/story';
 import RSS from './pages/rss';
 import Settings from './pages/settings';
+import About from './pages/about';
+import Storage from './pages/settings/storage';
+import SettingsMore from './pages/settings/more';
 
 export default function registerRoutes() {
     register(TABStory, Story);
     register(TABRSS, RSS);
     register(TABSettings, Settings);
+    register(IDAbout, About);
+    register(IDStorage, Storage);
+    register(IDSettingsMore, SettingsMore);
 }
 
 /** Simply register (reduce code) */
