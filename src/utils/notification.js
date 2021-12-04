@@ -1,8 +1,8 @@
 import { Platform } from 'react-native';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import PushNotification from 'react-native-push-notification';
+import PushNotification, { Importance } from 'react-native-push-notification';
 
-let channelId = '';
+const channelId = 'app_default_channel';
 let _configured = false;
 
 /**
@@ -19,10 +19,22 @@ export function configureNotification(fnNotify) {
 
     // Configure only once
     if (_configured) return;
-    PushNotification.getChannels((ids) => {
-        // eslint-disable-next-line prefer-destructuring
-        channelId = ids[0];
-    });
+    if (Platform.OS === 'android') {
+        PushNotification.channelExists(channelId, (exists) => {
+            if (exists) {
+                return;
+            }
+
+            PushNotification.createChannel({
+                channelId,
+                channelName: 'Default',
+                playSound: true,
+                importance: Importance.DEFAULT,
+                vibrate: false,
+            });
+        });
+    }
+    // PushNotification.getChannels((ids) => console.log(ids));
     PushNotification.configure({
         onNotification(notification) {
             const { payload } = notification.data;

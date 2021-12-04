@@ -35,6 +35,10 @@ class Story extends Component {
         };
     }
 
+    componentDidMount() {
+        setTimeout(() => this.setState({ status: STATUS_DONE }), 1500);
+    }
+
     onRefresh = () => {
         this.setState({ refreshing: true });
         setTimeout(() => {

@@ -9,7 +9,6 @@ import Text from './SText.js';
 import Badge from './Badge.js';
 import Touchable from './Touchable.js';
 
-const SIZE = 24;
 
 function ModalSelectOption(props) {
     const {
@@ -24,7 +23,7 @@ function ModalSelectOption(props) {
     return (
         <Touchable disabled={disabled} onPress={onPress}>
             <View style={[css.row, { padding: typo.padding }, disabled && { opacity: 0.65 }]}>
-                <View style={[css.value, { marginLeft: typo.margin, marginRight: icon ? typo.margin: 0 }]}>
+                <View style={[css.value, { marginRight: icon ? typo.margin: 0 }]}>
                     <Text style={{ flexShrink: 1 }}>{text}</Text>
                     {badge && (
                         <Badge text={badge} />
@@ -40,14 +39,14 @@ const css = StyleSheet.create({
     row: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
     },
     value: {
-        minHeight: 24,
-        flex: 1,
+        marginLeft: 4,
+        flexShrink: 1,
         flexDirection: 'row',
         alignItems: 'center',
     },
 });
 
-ModalSelectOption.INDICATOR_SIZE = SIZE;
 export default ModalSelectOption;

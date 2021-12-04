@@ -1,4 +1,5 @@
 import React from 'react';
+import { Text, Pressable, DevSettings } from 'react-native';
 
 import $ev from './utils/Event.js';
 import { themes } from './themes';
@@ -13,8 +14,8 @@ const defaultValue = {
 export const AppContext = React.createContext(defaultValue);
 
 export default class App extends React.PureComponent {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             lang: aps.get('lang') || defaultValue.lang,
             theme: themes[aps.get('theme')] || defaultValue.theme,
@@ -30,14 +31,37 @@ export default class App extends React.PureComponent {
         return (
             <AppContext.Provider value={this.state}>
                 {this.props.children}
+                <DevReloadButton />
             </AppContext.Provider>
         );
     }
 }
 
-export function registerAppContext(Screen) {
+function DevReloadButton() {
+    if (__DEV__) {
+        const styles = {
+            position: 'absolute',
+            right: 20,
+            bottom: 20,
+            padding: 10,
+            backgroundColor: defaultValue.theme.primaryColor,
+            borderRadius: 50,
+            opacity: 0.75,
+            elevation: 2,
+            zIndex: 99,
+        };
+        return (
+            <Pressable style={styles} onPress={() => DevSettings.reload()}>
+                <Text style={{ color: '#fff', fontSize: 12 }}>DevReload</Text>
+            </Pressable>
+        );
+    }
+    return null;
+}
+
+export function withAppContext(Screen) {
     return () => (props) => (
-        <App>
+        <App componentId={props.componentId}>
             <Screen {...props} />
         </App>
     );

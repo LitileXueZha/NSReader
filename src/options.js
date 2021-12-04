@@ -56,6 +56,7 @@ export function getDefaultOptions() {
         },
         animations: {
             push: {
+                waitForRender: true,
                 content: {
                     enter: {
                         translationX: {

@@ -43,7 +43,7 @@ function ModalSelect(props) {
     const { theme, typo } = useContext(AppContext);
     const cssTitle = {
         marginBottom: typo.padding,
-        marginLeft: typo.margin,
+        marginLeft: 4,
         paddingHorizontal: typo.padding,
         color: theme.fontColorSecond,
         fontSize: typo.fontSizeSmall,

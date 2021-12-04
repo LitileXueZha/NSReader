@@ -6,12 +6,14 @@ const FONT_HEIGHT = 20;
 const FONT_SIZE_SMALL = FONT_SIZE * 0.875;
 const PADDING = BASE_SPACE;
 const MARGIN = BASE_SPACE;
+const M_SIZE = BASE_SPACE * 2; // Most common used size, eg: icon, list item minHeight...
 
 export default {
     // Use namespace for extendable
     normal: {
         baseSpace: BASE_SPACE,
         goldRatio: GOLD_RATIO,
+        mSize: M_SIZE,
 
         padding: PADDING,
         margin: MARGIN,

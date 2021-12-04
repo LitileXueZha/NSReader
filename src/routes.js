@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigation } from 'react-native-navigation';
 
-import App from './AppContext.js';
+import { withAppContext } from './AppContext.js';
 import {
     TABStory,
     TABRSS,
@@ -21,11 +21,7 @@ export default function registerRoutes() {
 function register(name, Route) {
     Navigation.registerComponent(
         name,
-        () => (props) => (
-            <App>
-                <Route {...props} />
-            </App>
-        ),
+        withAppContext(Route),
         () => Route,
     );
 
