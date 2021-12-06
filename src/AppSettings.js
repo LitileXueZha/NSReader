@@ -46,7 +46,10 @@ class AppSettings {
      * @param {string} key See avaliable values in `settings.json`
      */
     get(key) {
-        return this._settings[key] || defaultSettings[key];
+        if (key in this._settings) {
+            return this._settings[key];
+        }
+        return defaultSettings[key];
     }
 
     /**
