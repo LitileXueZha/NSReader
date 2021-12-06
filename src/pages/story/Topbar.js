@@ -4,6 +4,7 @@ import {
     StyleSheet,
     ActivityIndicator,
     LayoutAnimation,
+    Pressable,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Checkbox from '@react-native-community/checkbox';
@@ -14,6 +15,7 @@ import Text from '../../components/SText.js';
 import ModalSelect from '../../components/ModalSelect.js';
 import Badge from '../../components/Badge.js';
 import Touchable, { TouchHighlight } from '../../components/Touchable.js';
+import useFilter from './useFilter.js';
 
 export const STATUS_LOADING = 0;
 export const STATUS_UPDATING = 1;
@@ -61,6 +63,15 @@ function Topbar(props) {
         setPickVisible(false);
         console.log(idx);
     };
+    const [filter, setFilter] = useFilter(data?.filter);
+    const onFilterPress = (type) => {
+        setFilter(type, !filter[type]);
+        onFilter?.(type, !filter[type]);
+    };
+    const onSummaryChange = () => onFilterPress('summary');
+    const onReadChange = () => onFilterPress('read');
+    const onTodayChange = () => onFilterPress('today');
+    const onLastChange = () => onFilterPress('last');
 
     return (
         <View style={[css.topbar, cssTopbar]}>
@@ -99,33 +110,33 @@ function Topbar(props) {
                 <View style={[css.filterBody, { borderColor: theme.borderColor }]}>
                     <View style={{ flex: 1, paddingVertical: typo.padding }}>
                         <Text style={[css.filterTitle, cssFilterTitle]}>筛选</Text>
-                        <View style={css.filterRow}>
+                        <Pressable style={css.filterRow} onPress={onSummaryChange}>
                             <View style={cssCheckbox}>
-                                <Checkbox {...ppCheckbox} />
+                                <Checkbox {...ppCheckbox} value={filter.summary} onValueChange={onSummaryChange} />
                             </View>
                             <Text style={css.filterLabel}>显示摘要</Text>
-                        </View>
-                        <View style={css.filterRow}>
+                        </Pressable>
+                        <Pressable style={css.filterRow} onPress={onReadChange}>
                             <View style={cssCheckbox}>
-                                <Checkbox value {...ppCheckbox} />
+                                <Checkbox {...ppCheckbox} value={filter.read} onValueChange={onReadChange} />
                             </View>
                             <Text style={css.filterLabel}>显示已读</Text>
-                        </View>
-                        <View style={css.filterRow}>
+                        </Pressable>
+                        <Pressable style={css.filterRow} onPress={onTodayChange}>
                             <View style={cssCheckbox}>
-                                <Checkbox {...ppCheckbox} />
+                                <Checkbox {...ppCheckbox} value={filter.today} onValueChange={onTodayChange} />
                             </View>
-                            <Text style={css.filterLabel}>仅显示今天</Text>
-                        </View>
+                            <Text style={css.filterLabel}>仅看今天</Text>
+                        </Pressable>
                     </View>
                     <View style={{ flex: 1, padding: typo.padding }}>
                         <Text style={[css.filterTitle, cssFilterTitle]}>排序</Text>
-                        <View style={css.filterRow}>
+                        <Pressable style={css.filterRow} onPress={onLastChange}>
                             <View style={cssCheckbox}>
-                                <Checkbox {...ppCheckbox} />
+                                <Checkbox {...ppCheckbox} value={filter.last} onValueChange={onLastChange} />
                             </View>
-                            <Text style={css.filterLabel}>最新优先</Text>
-                        </View>
+                            <Text style={css.filterLabel}>旧的优先</Text>
+                        </Pressable>
                     </View>
                 </View>
             )}

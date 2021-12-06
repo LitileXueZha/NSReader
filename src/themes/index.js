@@ -29,6 +29,22 @@ export const themes = {
         bgModalBody: light.canvas.default,
         bgPaperInset: light.scale.gray[1],
         // bgDisabled: light.neutral.muted,
+
+        /**
+         * Several colors
+         * 
+         * Used to generate a random color when channel's image load failed.
+         */
+        randomColors: [
+            light.neutral.emphasis,
+            light.accent.emphasis,
+            light.success.emphasis,
+            light.attention.emphasis,
+            light.severe.emphasis,
+            light.danger.emphasis,
+            light.done.emphasis,
+            light.sponsors.emphasis,
+        ],
     },
     dark: {
         id: 'dark',
@@ -48,6 +64,17 @@ export const themes = {
         bgModalBody: dark.scale.gray[7],
         bgPaperInset: dark.scale.black,
         // bgDisabled: dark.neutral.muted,
+
+        randomColors: [
+            dark.neutral.emphasis,
+            dark.accent.emphasis,
+            dark.success.emphasis,
+            dark.attention.emphasis,
+            dark.severe.emphasis,
+            dark.danger.emphasis,
+            dark.done.emphasis,
+            dark.sponsors.emphasis,
+        ],
     },
 };
 
