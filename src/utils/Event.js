@@ -23,7 +23,7 @@ Event.prototype.emit = function emit(eventName, data) {
     }
 };
 
-Event.prototype.off = function emit(eventName, listener) {
+Event.prototype.off = function off(eventName, listener) {
     const evSet = this.events.get(eventName);
 
     if (!evSet) {
@@ -39,8 +39,8 @@ Event.prototype.off = function emit(eventName, listener) {
 Event.prototype.once = function once(eventName, listener) {
     let evSet = this.events.get(eventName);
     const onceListener = (data) => {
+        this.off(eventName, onceListener);
         listener(data);
-        evSet.off(eventName, onceListener);
     };
 
     if (!evSet) {

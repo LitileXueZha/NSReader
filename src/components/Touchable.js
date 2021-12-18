@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import {
     TouchableHighlight,
     TouchableNativeFeedback,
@@ -26,7 +26,9 @@ export function TouchHighlight(props) {
  */
 function NativeFeedback(props) {
     const { theme: { touchFeedback } } = useContext(AppContext);
-    const background = touchFeedback && TouchableNativeFeedback.Ripple(touchFeedback, false);
+    const background = useMemo(() => touchFeedback
+        && TouchableNativeFeedback.Ripple(touchFeedback, false),
+    [touchFeedback]);
     return (
         <TouchableNativeFeedback background={background} {...props} />
     );

@@ -15,7 +15,45 @@ const BYTES_TEXT = ['B', 'K', 'M', 'G'];
  * entrie app.
  */
 class Formatter {
-    date(datetime) {}
+    /**
+     * Simplify date:
+     * + today => `09:02`
+     * + this year => `11/03`
+     * + in past years => `2010/01/31`
+     * 
+     * @param {string|Date} datetime
+     * @returns {string}
+     */
+    date(datetime) {
+        const rawDate = new Date(datetime);
+        const strs = [
+            rawDate.getFullYear(),
+            rawDate.getMonth() + 1,
+            rawDate.getDate(),
+            rawDate.getHours(),
+            rawDate.getMinutes(),
+        ];
+        const currDate = new Date();
+        const currYear = currDate.getFullYear();
+
+        if (strs[0] === currYear) {
+            // This year => 11/03
+            if (strs[2] !== currDate.getDate() || strs[1] !== currDate.getMonth() + 1) {
+                return strs.slice(1, 3)
+                    .map(padZeroStart)
+                    .join('/');
+            }
+            // Today => 09:02
+            return strs
+                .slice(3)
+                .map(padZeroStart)
+                .join(':');
+        }
+        // In past years => 2010/01/31
+        return strs.slice(0, 3)
+            .map(padZeroStart)
+            .join('/');
+    }
 
     /**
      * Convert bytes to K/M/G
@@ -40,6 +78,10 @@ class Formatter {
         }
         return `${value}${BYTES_TEXT[idx]}`;
     }
+}
+
+function padZeroStart(n) {
+    return n < 10 ? `0${n}` : n;
 }
 
 export default new Formatter();

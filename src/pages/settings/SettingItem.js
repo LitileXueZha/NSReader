@@ -41,7 +41,7 @@ export default function SettingItem(props) {
     return (
         <Touchable onPress={onItemPress} disabled={disableTouchEffect}>
             <View style={[css.row, { paddingVertical: typo.padding }, style]}>
-                <View style={[css.body, { paddingHorizontal: typo.padding }]}>
+                <View style={[css.body, { paddingHorizontal: typo.padding + 4 }]}>
                     <Text>{text}</Text>
                     {tips && (
                         <Text style={tipsStyle}>
@@ -49,7 +49,7 @@ export default function SettingItem(props) {
                         </Text>
                     )}
                 </View>
-                <View style={[css.action, { marginHorizontal: typo.margin }]} pointerEvents="none">
+                <View style={[css.action, { marginHorizontal: typo.margin + 4 }]} pointerEvents="none">
                     {value && (
                         <Text style={{ color: theme.fontColorSecond, marginRight: 2 }}>{value}</Text>
                     )}

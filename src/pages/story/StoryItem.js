@@ -4,6 +4,7 @@ import { View, StyleSheet, Pressable } from 'react-native';
 import Text from '../../components/SText.js';
 import { AppContext } from '../../AppContext.js';
 import Touchable, { TouchHighlight } from '../../components/Touchable.js';
+import format from '../../utils/format.js';
 
 function StoryItem(props) {
     const { data, onPress, hideSummary } = props;
@@ -35,7 +36,7 @@ function StoryItem(props) {
                         </Text>
                     )}
                     <View style={css.info}>
-                        <Text style={[css.date, { color: theme.fontColorSecond }]}>{new Date(data.date).toLocaleDateString()}</Text>
+                        <Text style={[css.date, { color: theme.fontColorSecond }]}>{format.date(data.date)}</Text>
                         <View style={{ backgroundColor: theme.randomColors[data.rcIdx], width: 12, height: 12 }} />
                     </View>
                 </View>

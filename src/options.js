@@ -98,12 +98,70 @@ export function getDefaultOptions() {
     return DEFAULT_OPTIONS;
 }
 
-const iconStory = Icon.getImageSourceSync('reader-outline', 128);
-const iconStoryEd = Icon.getImageSourceSync('reader', 128);
-const iconRss = Icon.getImageSourceSync('albums-outline', 128);
-const iconRssEd = Icon.getImageSourceSync('albums', 128);
-const iconSettings = Icon.getImageSourceSync('settings-outline', 128);
-const iconSettingsEd = Icon.getImageSourceSync('settings', 128);
+export function getComponentOptions() {
+    const theme = themes[aps.get('theme')] || themes.main;
+    /** @type {import('react-native-navigation').Options} */
+    const options = {
+        statusBar: {
+            backgroundColor: theme.background,
+        },
+        layout: {
+            componentBackgroundColor: theme.background,
+        },
+        bottomTabs: {
+            backgroundColor: theme.bottomTabsBackground,
+            borderColor: theme.borderColor,
+        },
+        bottomTab: {
+            iconColor: theme.fontColorSecond,
+            selectedIconColor: theme.fontColor,
+            textColor: theme.fontColorSecond,
+            selectedTextColor: theme.fontColor,
+        },
+    };
+
+    return options;
+}
+
+/**
+ * Chrome debug error:
+ *     Calling synchronous methods on native modules is not supported in Chrome.
+ * 
+ * Wrap the icons load function to a async.
+ * 
+ * This can also improve the first app render time. (✓)
+ */
+const cachedIcons = {
+    story: null,
+    rss: null,
+    settings: null,
+};
+export async function loadTabIcons() {
+    if (!cachedIcons.story) {
+        const icon = await Icon.getImageSource('reader-outline', 128);
+        const selectedIcon = await Icon.getImageSource('reader', 128);
+        cachedIcons.story = { icon, selectedIcon };
+    }
+    Navigation.mergeOptions(TABStory, { bottomTab: cachedIcons.story });
+    if (!cachedIcons.rss) {
+        const icon = await Icon.getImageSource('albums-outline', 128);
+        const selectedIcon = await Icon.getImageSource('albums', 128);
+        cachedIcons.rss = { icon, selectedIcon };
+    }
+    Navigation.mergeOptions(TABRSS, { bottomTab: cachedIcons.rss });
+    if (!cachedIcons.settings) {
+        const icon = await Icon.getImageSource('settings-outline', 128);
+        const selectedIcon = await Icon.getImageSource('settings', 128);
+        cachedIcons.settings = { icon, selectedIcon };
+    }
+    Navigation.mergeOptions(TABSettings, { bottomTab: cachedIcons.settings });
+}
+// const iconStory = Icon.getImageSourceSync('reader-outline', 128);
+// const iconStoryEd = Icon.getImageSourceSync('reader', 128);
+// const iconRss = Icon.getImageSourceSync('albums-outline', 128);
+// const iconRssEd = Icon.getImageSourceSync('albums', 128);
+// const iconSettings = Icon.getImageSourceSync('settings-outline', 128);
+// const iconSettingsEd = Icon.getImageSourceSync('settings', 128);
 
 const TAB_STORY = {
     /** @type {import('react-native-navigation').LayoutComponent} */
@@ -113,8 +171,8 @@ const TAB_STORY = {
         options: {
             bottomTab: {
                 text: '阅读',
-                icon: iconStory,
-                selectedIcon: iconStoryEd,
+                // icon: iconStory,
+                // selectedIcon: iconStoryEd,
             },
         },
     },
@@ -127,8 +185,8 @@ const TAB_RSS = {
         options: {
             bottomTab: {
                 text: 'RSS源',
-                icon: iconRss,
-                selectedIcon: iconRssEd,
+                // icon: iconRss,
+                // selectedIcon: iconRssEd,
             },
         },
     },
@@ -141,8 +199,8 @@ const TAB_SETTINGS = {
         options: {
             bottomTab: {
                 text: '设置',
-                icon: iconSettings,
-                selectedIcon: iconSettingsEd,
+                // icon: iconSettings,
+                // selectedIcon: iconSettingsEd,
             },
         },
     },
@@ -167,6 +225,7 @@ export const DEFAULT_ROOT = {
             id: 'root',
             children: [{
                 bottomTabs: {
+                    id: 'id_bottomTabs',
                     children: [TAB_STORY, TAB_RSS, TAB_SETTINGS],
                 },
             }],

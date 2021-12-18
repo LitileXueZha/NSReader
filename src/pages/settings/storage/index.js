@@ -62,7 +62,7 @@ class Storage extends Component {
         const { theme, typo } = this.context;
         const { fsInfo } = this.state;
         const progressStyle = {
-            backgroundColor: theme.linkColor,
+            backgroundColor: theme.successColor,
             height: '100%',
             width: `${fsInfo.percent * 100}%`,
         };
@@ -72,14 +72,14 @@ class Storage extends Component {
                 <Navbar title="存储" />
                 <ScrollView style={{ flex: 1, backgroundColor: theme.bgPaperInset }}>
                     <View style={{ backgroundColor: theme.background, marginTop: typo.margin }}>
-                        <View style={[css.overview, { padding: typo.padding, marginBottom: typo.margin }]}>
+                        <View style={[css.overview, { padding: typo.padding + 4, marginBottom: typo.margin }]}>
                             <Text>空间</Text>
                             <View style={{ alignItems: 'flex-end' }}>
                                 <Text style={{ color: theme.fontColorSecond }}>
                                     可用 {fsInfo.free} /
                                     总计 {fsInfo.total}
                                 </Text>
-                                <View style={[css.bar, { backgroundColor: theme.fontColorSecond }]}>
+                                <View style={[css.bar, { backgroundColor: theme.bgPaperInset }]}>
                                     <View style={progressStyle} />
                                 </View>
                             </View>

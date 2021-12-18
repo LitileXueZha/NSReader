@@ -9,19 +9,29 @@ import { AppContext } from '../AppContext.js';
  * @param {import('react-native').TextProps} props
  */
 function SText(props) {
-    const { style, children, ...restProps } = props;
+    const {
+        style,
+        children,
+        secondary,
+        ...restProps
+    } = props;
     const { theme, typo } = useContext(AppContext);
-    const themeStyles = {
+    const textStyles = [{
         color: theme.fontColor,
         fontSize: typo.fontSize,
         lineHeight: typo.fontHeight,
-    };
+    }];
+
+    if (secondary) {
+        textStyles[0].color = theme.fontColorSecond;
+    }
 
     return (
-        <Text style={[themeStyles, style]} {...restProps}>
+        <Text style={[textStyles, style]} {...restProps}>
             {children}
         </Text>
     );
 }
 
-export default React.memo(SText);
+// export default React.memo(SText);
+export default SText;

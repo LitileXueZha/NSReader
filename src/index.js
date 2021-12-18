@@ -1,8 +1,9 @@
+import React from 'react';
 import { AppRegistry, Platform, UIManager, LogBox } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 
 import registerRoutes from './routes.js';
-import { getDefaultOptions, DEFAULT_ROOT } from './options.js';
+import { getDefaultOptions, DEFAULT_ROOT, loadTabIcons } from './options.js';
 import { configureNotification } from './utils/notification.js';
 import AppSettings from './AppSettings.js';
 
@@ -16,6 +17,7 @@ export default function launchApp() {
         Navigation.setDefaultOptions(getDefaultOptions());
         Navigation.setRoot(DEFAULT_ROOT);
 
+        loadTabIcons();
         // Configure app notification
         configureNotification((data) => {
             console.log(data);
@@ -31,5 +33,10 @@ export default function launchApp() {
 
     if (__DEV__) {
         LogBox.ignoreLogs(['NativeEventEmitter']);
+        // require('@welldone-software/why-did-you-render')(React, {
+        //     trackAllPureComponents: true,
+        //     trackHooks: false, // Some issues when fast refresh, disabled
+        //     // exclude: [/FlatList/],
+        // });
     }
 }

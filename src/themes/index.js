@@ -2,6 +2,9 @@ import colors from '@primer/primitives/dist/js/colors';
 import light from '@primer/primitives/dist/js/colors/light.js';
 import dark from '@primer/primitives/dist/js/colors/dark.js';
 
+import iconEmpty from '../../assets/empty.png';
+import iconEmptyDark from '../../assets/empty_dark.png';
+
 /**
  * Support types: `main`, `dark`
  * 
@@ -16,8 +19,9 @@ export const themes = {
         fontColorSecond: light.scale.gray[4],
         fontColorHead: '#000000',
         linkColor: light.accent.fg,
-        primaryColor: light.scale.orange[4],
+        primaryColor: '#FFA733',
         dangerColor: light.danger.fg,
+        successColor: light.success.fg,
 
         /**
          * Bottom tabs is a little darker than background
@@ -29,6 +33,7 @@ export const themes = {
         bgModalBody: light.canvas.default,
         bgPaperInset: light.scale.gray[1],
         // bgDisabled: light.neutral.muted,
+        bgRSSHelp: light.success.subtle,
 
         /**
          * Several colors
@@ -45,6 +50,9 @@ export const themes = {
             light.done.emphasis,
             light.sponsors.emphasis,
         ],
+        imgIcons: {
+            empty: iconEmpty,
+        },
     },
     dark: {
         id: 'dark',
@@ -54,8 +62,9 @@ export const themes = {
         fontColorSecond: dark.fg.muted,
         fontColorHead: '#ffffff',
         linkColor: dark.accent.fg,
-        primaryColor: dark.scale.orange[4],
+        primaryColor: '#FFA733',
         dangerColor: dark.danger.fg,
+        successColor: dark.success.fg,
 
         bottomTabsBackground: dark.canvas.inset,
         touchHighlight: dark.neutral.subtle,
@@ -64,6 +73,7 @@ export const themes = {
         bgModalBody: dark.scale.gray[7],
         bgPaperInset: dark.scale.black,
         // bgDisabled: dark.neutral.muted,
+        bgRSSHelp: dark.success.subtle,
 
         randomColors: [
             dark.neutral.emphasis,
@@ -75,6 +85,37 @@ export const themes = {
             dark.done.emphasis,
             dark.sponsors.emphasis,
         ],
+        imgIcons: {
+            empty: iconEmptyDark,
+        },
+    },
+};
+/**
+ * Button themes
+ */
+export const buttons = {
+    main: {
+        default: {
+            color: themes.main.fontColor,
+            /** gradient colors */
+            bg: [light.scale.gray[0], light.scale.gray[1]],
+        },
+        primary: {
+            color: '#fff',
+            bg: ['#FFA733', '#D39940'], // ORANGE, ORANGE_DARK
+            borderColor: 'transparent',
+        },
+    },
+    dark: {
+        default: {
+            color: themes.dark.fontColor,
+            bg: [dark.scale.gray[6], dark.scale.gray[7]],
+        },
+        primary: {
+            color: '#fff',
+            bg: ['#FFA733', '#D39940'],
+            borderColor: 'transparent',
+        },
     },
 };
 

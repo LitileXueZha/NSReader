@@ -20,13 +20,13 @@ const TDATA = [{
     text: '全部',
     badge: 234,
 }, {
-    text: 'Solidot.org',
-    badge: 12,
-    icon: <Ionicon name="checkmark" size={24} />,
-}, {
     text: '已禁用',
     disabled: true,
     icon: <Ionicon name="cloud-done" size={24} />,
+}, {
+    text: 'Solidot.org',
+    badge: 12,
+    icon: <Ionicon name="checkmark" size={24} />,
 }];
 
 // Alert.alert('来源');
@@ -42,9 +42,8 @@ function ModalSelect(props) {
     const [activeIdx, setActiveIdx] = useState(currIndex || 0);
     const { theme, typo } = useContext(AppContext);
     const cssTitle = {
-        marginBottom: typo.padding,
         marginLeft: 4,
-        paddingHorizontal: typo.padding,
+        padding: typo.padding,
         color: theme.fontColorSecond,
         fontSize: typo.fontSizeSmall,
     };
@@ -75,13 +74,16 @@ function ModalSelect(props) {
              */}
             <Pressable style={css.overlay} onPress={onRequestClose} />
             <View style={css.container}>
-                <View style={[css.body, { backgroundColor: theme.bgModalBody, paddingVertical: typo.padding }]}>
-                    <Text style={cssTitle} numberOfLines={1}>{title}</Text>
+                <View style={[css.body, { backgroundColor: theme.bgModalBody }]}>
+                    {title && (
+                        <Text style={cssTitle}>{title}</Text>
+                    )}
                     <ScrollView style={{ maxHeight: maxHeightBody }} disableScrollViewPanResponder>
                         {datalist.map((item, index) => (
                             <Option
-                                {...item}
                                 key={item.text}
+                                data={item}
+                                active={index === activeIdx}
                                 onPress={() => {
                                     setActiveIdx(index);
                                     onClose(index);

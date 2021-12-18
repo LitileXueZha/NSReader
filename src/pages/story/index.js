@@ -25,15 +25,17 @@ import Topbar, {
     TOPBAR_SPACE,
 } from './Topbar.js';
 import AppSettings from '../../AppSettings.js';
-import getRandomValues from './randomize.js';
+import { getRandomStories } from '../../utils/randomize.js';
 import StoryItem from './StoryItem.js';
 import { doFilter } from './useFilter.js';
+import Empty from '../../components/Empty.js';
+import Link from '../../components/Link.js';
 
 
 class Story extends Component {
     constructor() {
         super();
-        this.stories = getRandomValues(0);
+        this.stories = getRandomStories(0);
         this.state = {
             status: STATUS_LOADING,
             // status: STATUS_DONE,
@@ -56,7 +58,7 @@ class Story extends Component {
     onRefresh = () => {
         this.setState({ refreshing: true });
         setTimeout(() => {
-            this.stories = getRandomValues(500);
+            this.stories = getRandomStories(500);
             this.setState({
                 refreshing: false,
                 status: STATUS_DONE,
@@ -131,8 +133,8 @@ class Story extends Component {
                     refreshing={refreshing}
                     onRefresh={this.onRefresh}
                     progressViewOffset={TOPBAR_SPACE}
-                    contentContainerStyle={css.list}
-                    ListFooterComponent={(
+                    contentContainerStyle={[css.list, stories.length === 0 && { flex: 1 }]}
+                    ListFooterComponent={stories.length > 0 && (
                         <View style={{ padding: typo.padding }}>
                             <Text>Story</Text>
                             <View>
@@ -148,11 +150,20 @@ class Story extends Component {
                                     <Text>发送通知</Text>
                                 </View>
                             </Touchable>
-                            <Button title="保存主题" onPress={() => AppSettings.store('theme', theme.id === 'main' ? 'dark' : 'main')} />
                             <Button title="第二个页面" onPress={() => Navigation.push('root',{component:{name:'settings'}})} />
                         </View>
                     )}
-                    ListEmptyComponent={<Text>空空如也</Text>}
+                    ListEmptyComponent={(
+                        <Empty
+                            style={{ position: 'relative', top: -typo.padding }}
+                            more={(
+                                <>
+                                    <Text style={{ marginTop: typo.margin }}>试试下拉刷新</Text>
+                                    <Text>或者<Link to="rss">去添加一个RSS源</Link></Text>
+                                </>
+                            )}
+                        />
+                    )}
                     /* Performance */
                     // debug
                     windowSize={9}
@@ -160,7 +171,7 @@ class Story extends Component {
                     disableScrollViewPanResponder
                     // Android only
                     endFillColor={theme.background}
-                    fadingEdgeLength={20}
+                    fadingEdgeLength={10}
                     nestedScrollEnabled={false}
                     overScrollMode="always"
                 />

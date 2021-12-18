@@ -1,6 +1,7 @@
 export const TABStory = 'story';
 export const TABRSS = 'rss';
 export const TABSettings = 'settings';
+export const tabIDs = [TABStory, TABRSS, TABSettings];
 
 export const IDAbout = Symbol('pages/about');
 export const IDStorage = Symbol('pages/settings/storage');

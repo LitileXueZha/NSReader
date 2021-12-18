@@ -5,6 +5,7 @@ import {
     StyleSheet,
     View,
     Pressable,
+    StatusBar,
 } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
@@ -42,7 +43,11 @@ export default function Navbar(props) {
     const [visible, setVisible] = useState(false);
 
     const onBackPress = () => {
-        Navigation.pop('root');
+        Navigation.pop('root').catch((e) => {
+            if (__DEV__) {
+                console.warn(e);
+            }
+        });
     };
     const onRequestClose = () => {
         setVisible(false);
@@ -83,13 +88,14 @@ export default function Navbar(props) {
                     onRequestClose={onRequestClose}
                     onShow={onModalShow}
                     transparent
+                    statusBarTranslucent
                 >
                     <Pressable onPress={onRequestClose} style={css.overlay} />
                     <View style={[css.optionsMenu, { backgroundColor: theme.bgModalBody }]}>
                         {visible && menus.map((item, index) => (
                             <Option
-                                {...item}
                                 key={item.text}
+                                data={item}
                                 onPress={() => onOptionPress(index)}
                             />
                         ))}
@@ -112,8 +118,8 @@ const css = StyleSheet.create({
     },
     optionsMenu: {
         position: 'absolute',
-        right: 4,
-        top: 4,
+        right: 6,
+        top: 6 + StatusBar.currentHeight,
         padding: 0.1,
         borderRadius: 2,
         elevation: 6,
