@@ -16,6 +16,7 @@ function Button(props) {
         type = 'default', // primary
         outline,
         size = 'normal', // TODO: small, large
+        boxStyle,
         style,
         onPress,
         children,
@@ -33,6 +34,7 @@ function Button(props) {
         color: themeButton.color,
         fontSize: typo.fontSizeSmall,
         lineHeight: HEIGHT,
+        textAlign: 'center',
         paddingHorizontal: typo.padding,
     };
     let ButtonWrapper = LinearGradient;
@@ -52,7 +54,7 @@ function Button(props) {
     return (
         <ButtonWrapper {...gradientProps}>
             <Touchable onPress={onPress}>
-                <View style={buttonStyles}>
+                <View style={[buttonStyles, boxStyle]}>
                     <Text style={[textStyles, style]}>
                         {children}
                     </Text>

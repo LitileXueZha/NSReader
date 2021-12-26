@@ -18,6 +18,8 @@ import SourceItem from './SourceItem.js';
 import { getRandomSources } from '../../utils/randomize.js';
 import Empty from '../../components/Empty.js';
 import Button from '../../components/Button.js';
+import { IDRSSAdd } from '../IDSymbols.js';
+import Touchable from '../../components/Touchable.js';
 
 const TDATA = [
     { title: '奇客Solidot–传递最新科技情报', date: new Date(), description: '奇客的知识，重要的东西。', rcIdx: 2, enabled: true },
@@ -48,7 +50,9 @@ class RSS extends Component {
     }
 
     onSourceAdd = () => {
-        this.setState({ sources: getRandomSources(10) });
+        Navigation.push('root', {
+            component: { name: IDRSSAdd },
+        });
     };
 
     onSourcePress = (index) => {
@@ -109,10 +113,12 @@ class RSS extends Component {
                                 <Icon name="help-circle-outline" color={theme.linkColor} size={typo.mSize} />
                                 <Text style={{ color: theme.linkColor, marginLeft: 4 }}>了解如何添加RSS源</Text>
                             </View>
-                            <Pressable style={[css.helpLink, helpStyles, { marginTop: 0 }]} onPress={this.onTutorialPress}>
-                                <Icon name="happy-outline" color={theme.fontColor} size={typo.mSize} />
-                                <Text style={{ marginLeft: 4 }}>开始使用</Text>
-                            </Pressable>
+                            <Touchable onPress={this.onTutorialPress}>
+                                <View style={[css.helpLink, helpStyles, { marginTop: 0 }]}>
+                                    <Icon name="happy-outline" color={theme.fontColor} size={typo.mSize} />
+                                    <Text style={{ marginLeft: 4 }}>开始使用</Text>
+                                </View>
+                            </Touchable>
                         </>
                     )}
                     ListFooterComponentStyle={[sources.length > 0 && css.flex1, { justifyContent: 'flex-end' }]}

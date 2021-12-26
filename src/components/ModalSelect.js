@@ -101,6 +101,8 @@ const css = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 32,
     },
     overlay: {
         position: 'absolute',
@@ -112,8 +114,8 @@ const css = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.45)',
     },
     body: {
-        marginHorizontal: 32,
-        maxWidth: 680,
+        width: '100%',
+        maxWidth: 360,
         borderRadius: 2,
         elevation: 12,
     },

@@ -51,7 +51,7 @@ class Settings extends Component {
                             text="语言"
                             value="中文"
                             onPress={() => {}}
-                            icon={<Icon name="earth" size={typo.fontSize} color={theme.fontColorSecond} />}
+                            icon={<Icon name="globe-outline" size={typo.fontHeight} color={theme.fontColorSecond} />}
                         />
                         <SettingItem
                             type="select"
@@ -59,7 +59,7 @@ class Settings extends Component {
                             tips="控制应用颜色"
                             value={themeName}
                             onPress={() => this.setState({ theme: true })}
-                            icon={<Icon name="color-palette-outline" size={typo.fontSize} color={theme.fontColorSecond} />}
+                            // icon={<Icon name="color-palette-outline" size={typo.mSize} color={theme.fontColorSecond} />}
                         />
                     </View>
                     <View style={{ backgroundColor: theme.background, marginTop: typo.margin }}>
