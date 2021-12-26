@@ -6,6 +6,8 @@ import registerRoutes from './routes.js';
 import { getDefaultOptions, DEFAULT_ROOT, loadTabIcons } from './options.js';
 import { configureNotification } from './utils/notification.js';
 import AppSettings from './AppSettings.js';
+import configureBackgroundTasks from './BackgroundTasks.js';
+import Perf from './utils/Perf.js';
 
 
 export default function launchApp() {
@@ -13,7 +15,7 @@ export default function launchApp() {
     Navigation.events().registerAppLaunchedListener(async () => {
         await AppSettings.init();
 
-        console.log('launched!');
+        Perf.info('Launched!');
         Navigation.setDefaultOptions(getDefaultOptions());
         Navigation.setRoot(DEFAULT_ROOT);
 
@@ -23,6 +25,7 @@ export default function launchApp() {
             console.log(data);
         });
     });
+    configureBackgroundTasks();
 
     // Enable layout animations on android
     if (Platform.OS === 'android') {
