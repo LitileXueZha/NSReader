@@ -72,9 +72,7 @@ class Formatter {
         if (idx > 0) {
             value = intBytes / BYTES_THRESHOLD[idx];
             // Reduce float numbers
-            if (value % 10 !== 0) {
-                value = value.toFixed(1);
-            }
+            value = Math.round(value);
         }
         return `${value}${BYTES_TEXT[idx]}`;
     }

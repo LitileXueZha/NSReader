@@ -47,8 +47,8 @@ class About extends Component {
                     <View style={{ backgroundColor: theme.background, marginTop: typo.margin }}>
                         <SettingItem
                             text="版本"
-                            tips="build_20201106"
-                            value="1.3.0"
+                            tips={__BUILD__}
+                            value={__VERSION__}
                             disableTouchEffect
                         />
                         <SettingItem

@@ -2,6 +2,17 @@
 function start() {}
 function info() {}
 function log() {}
+function error() {
+    /**
+     * Production error monitor
+     * 
+     * TODO:
+     * Record the error stacks, write logs to disk.
+     * 
+     * It's useful for developer when tracking issues, but
+     * users can disable this feature.
+     */
+}
 
 if (__DEV__) {
     /**
@@ -17,8 +28,8 @@ if (__DEV__) {
         const tsDiff = Date.now() - __START__;
         let tsLog = `+${tsDiff}ms`;
 
-        if (tsDiff > 1000) {
-            tsLog = `+${(tsDiff / 1000).toFixed(1)}s`;
+        if (tsDiff > 10000) {
+            tsLog = `+${(tsDiff / 10000).toFixed(0)}s`;
         }
         if (isRN) {
             // Command line
@@ -36,6 +47,7 @@ if (__DEV__) {
         console.log(...logs);
     }
     log = console.log;
+    error = console.error;
     start();
 }
 
@@ -43,4 +55,5 @@ export default {
     start,
     info,
     log,
+    error,
 };

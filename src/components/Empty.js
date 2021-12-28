@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
+import FastImage from 'react-native-fast-image';
 
 import { AppContext } from '../AppContext.js';
 import Text from './SText.js';
@@ -10,7 +11,7 @@ export default function Empty(props) {
     return (
         <View style={[css.body, style]}>
             {icon || (
-                <Image source={theme.imgIcons.empty} resizeMode="contain" style={css.icon} />
+                <FastImage source={theme.imgIcons.empty} resizeMode="contain" style={css.icon} />
             )}
             <Text style={{ color: theme.fontColorSecond, marginTop: 4 }}>
                 {description || '空空如也'}

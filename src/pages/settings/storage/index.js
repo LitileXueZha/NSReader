@@ -4,15 +4,20 @@ import {
     Alert,
     StyleSheet,
     ScrollView,
+    Platform,
 } from 'react-native';
 import fs from 'react-native-fs';
 import Icon from 'react-native-vector-icons/Ionicons';
+import FastImage from 'react-native-fast-image';
 
 import format from '../../../utils/format.js';
 import { AppContext } from '../../../AppContext.js';
 import Text from '../../../components/SText.js';
 import SettingItem from '../SettingItem.js';
 import Navbar from '../../../components/Navbar.js';
+import MRSS from '../../../models/RSS.js';
+import MStory from '../../../models/Story.js';
+import aps from '../../../AppSettings.js';
 
 class Storage extends Component {
     constructor() {
@@ -23,6 +28,9 @@ class Storage extends Component {
                 free: '-G',
                 total: '-G',
             },
+            cache: 0,
+            dataSource: 0,
+            setting: aps.bytes,
         };
     }
 
@@ -36,9 +44,45 @@ class Storage extends Component {
                 },
             });
         });
+        MRSS.diskUsage().then((res) => {
+            this.setState({
+                dataSource: res.bytes + this.state.dataSource,
+                setting: res.index + this.state.setting,
+            });
+        });
+        MStory.diskUsage().then((res) => {
+            this.setState({
+                cache: res.bytes + this.state.cache,
+            });
+            this.diskUsageOfRNFI().then((bytes) => {
+                this.setState({ cache: bytes + this.state.cache });
+            });
+        }).catch((e) => {});
     }
 
-    onCacheDrop = () => {}
+    /**
+     * Cache of `react-native-fast-image`
+     * 
+     * Currently found in 'cache/image_manager_disk_cache' on Android
+     */
+    // eslint-disable-next-line
+    async diskUsageOfRNFI() {
+        const dir = Platform.select({
+            android: `${fs.CachesDirectoryPath}/image_manager_disk_cache`,
+        });
+        let bytes = 0;
+        const files = await fs.readDir(dir);
+        for (const file of files) {
+            bytes += file.size;
+        }
+        return bytes;
+    }
+
+    onCacheDrop = async () => {
+        FastImage.clearDiskCache();
+        await MStory.clearDisk();
+        this.setState({ cache: 0 });
+    }
 
     onDataClear = () => {
         Alert.alert(
@@ -47,8 +91,9 @@ class Storage extends Component {
             [{
                 text: '确认删除',
                 style: 'destructive',
-                onPress: () => {
-                    // delete
+                onPress: async () => {
+                    await MRSS.clearDisk();
+                    this.setState({ dataSource: 0 });
                 },
             }, {
                 text: '取消',
@@ -60,7 +105,7 @@ class Storage extends Component {
 
     render() {
         const { theme, typo } = this.context;
-        const { fsInfo } = this.state;
+        const { fsInfo, cache, dataSource, setting } = this.state;
         const progressStyle = {
             backgroundColor: theme.successColor,
             height: '100%',
@@ -86,20 +131,20 @@ class Storage extends Component {
                         </View>
                         <SettingItem
                             text="缓存"
-                            tips="内容缓存，网站图标缓存等"
-                            value="300 M"
+                            tips="内容缓存，图片缓存等"
+                            value={format.bytes(cache)}
                             disableTouchEffect
                         />
                         <SettingItem
                             text="数据文件"
                             tips="已下载的 RSS 源文件"
-                            value="12 M"
+                            value={format.bytes(dataSource)}
                             disableTouchEffect
                         />
                         <SettingItem
                             text="应用配置"
                             tips="保存的 RSS 源列表，应用设置"
-                            value="20 K"
+                            value={format.bytes(setting)}
                             disableTouchEffect
                         />
                     </View>

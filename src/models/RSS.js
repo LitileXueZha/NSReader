@@ -1,8 +1,11 @@
+/* eslint-disable class-methods-use-this */
 import fs from 'react-native-fs';
 import MD5 from 'crypto-js/md5';
 import { nanoid } from 'nanoid/non-secure';
 
+import Perf from '../utils/Perf.js';
 import MStory from './Story.js';
+import parseRSS from '../utils/RSSParser.js';
 
 /** The download file path when add rss */
 export const RSS_ADD_DLP = `${fs.CachesDirectoryPath}/rssadd.tmp`;
@@ -16,6 +19,7 @@ const RSS_DEFAULT_EXTRA = {
     enabled: 1,
 };
 const RSS_INDEX = 'index.json';
+const REG_URL_ORIGIN = /^(https?:\/\/([\w-]+\.)+[\w-]+)/;
 
 /**
  * Abstract data layer of rss
@@ -23,14 +27,147 @@ const RSS_INDEX = 'index.json';
 class RSSSource {
     constructor() {
         this.data = {};
+        this.initialized = false;
+    }
+
+    async init() {
+        if (this.initialized) {
+            return;
+        }
+        this.initialized = true;
+        Perf.start();
+        try {
+            const dirs = await fs.readDir(RSS_DIR);
+            const readTasks = dirs.map((v) => fs.readFile(`${v.path}/${RSS_INDEX}`));
+            const contents = await Promise.all(readTasks);
+            for (const content of contents) {
+                try {
+                    const rssItem = JSON.parse(content);
+                    this.data[rssItem.id] = rssItem;
+                } catch (e) {
+                    // Don't let the error break the loop, handle more items as possible
+                }
+            }
+        } catch (e) {
+            // Read failed, usually no rss items
+            Perf.error(e);
+        }
+        Perf.info('RSSSource initialized');
     }
 
     async create(url, data) {
         const id = MD5(url).toString();
         const dataPath = `${RSS_DIR}/${id}`;
-        const { story, ...rssMetadata } = data;
 
         await fs.mkdir(dataPath);
+        const saveId = this._getSaveId(data);
+        if (saveId) {
+            await fs.moveFile(RSS_ADD_DLP, `${dataPath}/${saveId}.xml`).catch((e) => {
+                // Move failed
+                Perf.error(e);
+            });
+        }
+        const rssMetadata = this._getMetadata(data);
+        const rssItem = {
+            ...rssMetadata,
+            ...RSS_DEFAULT_EXTRA,
+            // Assign id
+            id,
+            url,
+            // Allocate a random color index
+            rcIdx: parseInt(Math.random() * 8, 10),
+        };
+        await this._saveWork(rssItem);
+        // Deal with story
+        MStory.append(data.story, rssItem);
+    }
+
+    async fetch(id) {
+        const { url } = this.data[id];
+        const ac = new AbortController();
+        const timer = setTimeout(() => ac.abort(), 30000); // 30s
+        const resp = await fetch(url, {
+            method: 'GET',
+            redirect: 'follow',
+            signal: ac.signal,
+        });
+        clearTimeout(timer);
+        if (!resp.ok) {
+            return;
+        }
+        const sourceText = await resp.text();
+        const result = parseRSS(sourceText || '');
+        if (!result?.ok) {
+            return;
+        }
+        const { data } = result;
+        const saveId = this._getSaveId(data);
+
+        if (saveId) {
+            // Don't use await, make it concurrent
+            fs.writeFile(`${RSS_DIR}/${id}/${saveId}.xml`, sourceText).catch((e) => {
+                Perf.error(e);
+            });
+        }
+        const rssMetadata = this._getMetadata(data);
+        await this.update(id, rssMetadata);
+        MStory.append(data.story, rssMetadata);
+    }
+
+    async fetchAll() {
+        await this.init();
+        const ids = Object.keys(this.data);
+        const tasks = ids.map((id) => this.fetch(id));
+
+        // Concurrent mode
+        await Promise.all(tasks).catch((e) => {
+            Perf.error(e);
+        });
+    }
+
+    async update(id, data = {}) {
+        if (!this.data[id]) {
+            return;
+        }
+        await this._saveWork({ ...this.data[id], ...data });
+    }
+
+    async _saveWork(data) {
+        const { id } = data;
+        const content = JSON.stringify(data);
+        this.data[id] = data;
+        await fs.writeFile(`${RSS_DIR}/${id}/${RSS_INDEX}`, content).catch((e) => {
+            Perf.error(e);
+        });
+    }
+
+    _getMetadata(dataParsed) {
+        const { story, ...mdata } = dataParsed;
+
+        // Atom 1.0 may has multiple links
+        if (mdata.link instanceof Array) {
+            mdata.link = mdata.link[0];
+        }
+        // RSS 2.0 has publish interval
+        if (mdata.ttl) {
+            mdata.ttl = parseInt(mdata.ttl, 10);
+        }
+        if (!mdata.favicon && mdata.link) {
+            // Use website favicon.ico
+            const matches = mdata.link.match(REG_URL_ORIGIN);
+            if (matches) {
+                mdata.favicon = `${matches[0]}/favicon.ico`;
+            }
+        }
+        mdata.date = new Date(mdata.date).getTime(); // convert to timestamp
+        return mdata;
+    }
+
+    _getSaveId(dataParsed) {
+        const { story } = dataParsed;
+        if (story.length === 0) {
+            return false;
+        }
         // Use latest story title as file name, for quick check
         // should save it or not. If exists, it's duplicate.
         let latest = story[0];
@@ -39,34 +176,45 @@ class RSSSource {
                 latest = story[i];
             }
         }
-        if (latest) {
-            const storeFile = MD5(latest.title).toString();
-            await fs.moveFile(RSS_ADD_DLP, `${dataPath}/${storeFile}.xml`).catch((e) => {
-                // Move failed
-                console.warn(e);
-            });
-        }
-        // Atom 1.0 may has multiple links
-        if (rssMetadata.link instanceof Array) {
-            rssMetadata.link = rssMetadata.link[0];
-        }
-        // Assign id
-        rssMetadata.id = id;
-        rssMetadata.url = url;
-        // Allocate a random color index
-        rssMetadata.rcIdx = parseInt(Math.random() * 8, 10);
-
-        const rssItem = { ...rssMetadata, ...RSS_DEFAULT_EXTRA };
-        // Write to disk
-        await fs.writeFile(`${dataPath}/${RSS_INDEX}`, JSON.stringify(rssItem));
-        // Add to memory
-        this.data[id] = rssItem;
-        // Deal with story
-        console.log(story.map(v=>MD5(v.title).toString()))
-        MStory.append(story, rssItem);
+        return MD5(latest.title).toString();
     }
 
-    update(id, data) {}
+    async diskUsage() {
+        let dataBytes = 0;
+        let dataIndexBytes = 0;
+
+        try {
+            const dirs = await fs.readdir(RSS_DIR);
+            const tasks = dirs.map((d) => fs.readDir(`${RSS_DIR}/${d}`));
+            const results = await Promise.all(tasks);
+
+            for (const files of results) {
+                for (const file of files) {
+                    if (file.name === RSS_INDEX) {
+                        dataIndexBytes += file.size;
+                    } else {
+                        dataBytes += file.size;
+                    }
+                }
+            }
+        } catch (e) { /**/ }
+
+        return { bytes: dataBytes, index: dataIndexBytes };
+    }
+
+    async clearDisk() {
+        const delFiles = [];
+        const dirs = await fs.readDir(RSS_DIR);
+        const tasks = dirs.map((d) => fs.readDir(d.path));
+        const subDirs = await Promise.all(tasks);
+        subDirs.forEach((d) => d.forEach((file) => {
+            if (file.name !== RSS_INDEX) {
+                delFiles.push(file.path);
+            }
+        }));
+        const delTasks = delFiles.map((f) => fs.unlink(f));
+        await Promise.all(delTasks);
+    }
 }
 
 export default new RSSSource();

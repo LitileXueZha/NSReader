@@ -1,4 +1,5 @@
 import { SAXParser } from './sax.js';
+import Perf from './Perf.js';
 
 const PARSE_STRICT = false;
 const PARSE_OPT = {
@@ -17,9 +18,7 @@ export class RSSParser extends SAXParser {
     }
 
     onerror(e) {
-        if (__DEV__){
-            console.error(e);
-        }
+        Perf.error(e);
     }
 
     // How to stop a while-loop? A big problem...

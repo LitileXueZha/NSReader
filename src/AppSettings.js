@@ -2,6 +2,7 @@ import { InteractionManager } from 'react-native';
 import fs from 'react-native-fs';
 
 import defaultSettings from './settings.json';
+import Perf from './utils/Perf.js';
 
 const { DocumentDirectoryPath } = fs;
 const FILE = `${DocumentDirectoryPath}/settings.json`;
@@ -14,6 +15,7 @@ const WRITE_THRESHOLD = 300;
  */
 class AppSettings {
     constructor() {
+        this.bytes = 0;
         this._settings = {};
         this._initialized = false;
         this._timer = null;
@@ -30,7 +32,8 @@ class AppSettings {
 
         try {
             const rawJson = await fs.readFile(FILE);
-            console.log('Load settings:', rawJson);
+            this.bytes = rawJson.length;
+            Perf.log('Load settings:', rawJson);
             this._settings = JSON.parse(rawJson);
         } catch (e) {
             // Use defaults and save it on device
