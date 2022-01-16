@@ -13,6 +13,7 @@ import Text from '../../components/SText.js';
 import { TouchHighlight } from '../../components/Touchable.js';
 import SettingItem from '../settings/SettingItem.js';
 import Navbar from '../../components/Navbar.js';
+import { openLink } from '../../components/Link.js';
 
 class About extends Component {
     constructor() {
@@ -26,6 +27,10 @@ class About extends Component {
             url: '',
             title: 'NSReader',
         });
+    }
+
+    goFeedback = () => {
+        openLink('https://github.com/LitileXueZha/NSReader/issues');
     }
 
     render() {
@@ -66,6 +71,7 @@ class About extends Component {
                             type="link"
                             text="问题与反馈"
                             tips="去 Github 上创建 issue"
+                            onPress={this.goFeedback}
                         />
                         <SettingItem
                             text="捐赠"

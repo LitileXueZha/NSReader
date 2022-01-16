@@ -95,10 +95,7 @@ class Settings extends Component {
                         />
                     </View>
 
-                    <View style={{ padding: typo.padding }}>
-                        <Text>Settings</Text>
-                        <Text>{JSON.stringify(I18nManager.getConstants(),null,2)}</Text>
-                    </View>
+                    {/* <Text>{JSON.stringify(I18nManager.getConstants(),null,2)}</Text> */}
                 </ScrollView>
                 <ModalTheme visible={themeVisible} onClose={this.onThemeClose} />
             </>

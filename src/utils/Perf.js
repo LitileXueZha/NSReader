@@ -21,15 +21,15 @@ if (__DEV__) {
     var __START__;
     var isRN = !navigator.userAgent;
     start = function () {
-        __START__ = Date.now();
+        __START__ = performance.now();
     }
     info = function (message) {
         const logs = [];
-        const tsDiff = Date.now() - __START__;
-        let tsLog = `+${tsDiff}ms`;
+        const tsDiff = performance.now() - __START__;
+        let tsLog = `+${tsDiff.toFixed(2)}ms`;
 
         if (tsDiff > 10000) {
-            tsLog = `+${(tsDiff / 10000).toFixed(0)}s`;
+            tsLog = `+${(tsDiff / 10000).toFixed(3)}s`;
         }
         if (isRN) {
             // Command line

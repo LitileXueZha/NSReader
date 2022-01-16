@@ -1,4 +1,4 @@
-function Event() {
+export function Event() {
     this.events = new Map();
 }
 
@@ -37,17 +37,12 @@ Event.prototype.off = function off(eventName, listener) {
 };
 
 Event.prototype.once = function once(eventName, listener) {
-    let evSet = this.events.get(eventName);
-    const onceListener = (data) => {
-        this.off(eventName, onceListener);
+    const autoRemoveListener = (data) => {
+        this.off(eventName, autoRemoveListener);
         listener(data);
     };
 
-    if (!evSet) {
-        evSet = new Set();
-        this.events.set(eventName, evSet);
-    }
-    evSet.add(onceListener);
+    this.on(eventName, autoRemoveListener);
 };
 
 export default new Event();

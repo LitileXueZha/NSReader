@@ -15,7 +15,7 @@
 
 As a real user. 不应该把功能“设计”（塞）给用户，而是把自己当成真正的用户，我需要这样的功能，于是这样设计。
 
-Progressive enhancement. 事实上，很多时候仅仅有这个功能就够了，大家并不关心其它的各种“奇奇怪怪的东西”。产品的核心功能 > 便捷的、可简化的设计 > ~~增强体验才必要添加的~~ > ~~所谓的“闭环”、丰富多彩化~~ > ~~商业化、广告~~。
+Progressive enhancement. 事实上，很多时候仅仅有这个功能就够了，大家并不关心其它的各种“奇奇怪怪的东西”。产品的核心功能 > 便捷的、可简化的设计 > ~~增强体验才必要添加的 > 所谓的“闭环”、丰富多彩化 > 商业化、广告~~。
 
 标准化。成套的颜色体系主题，排版...
 
@@ -26,7 +26,7 @@ Use html and css to design directly. All in one `html`.
 Start a local server, auto reload `.html` after it changes:
 
 ```bash
-$ node UIDesign/server.js
+$ node UIDesign/server.cjs
   UIDesignServer start ==> http://localhost:8010 +0ms
   UIDesignServer GET / +4s
   UIDesignServer GET /livereload +271ms

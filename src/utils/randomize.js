@@ -18,7 +18,7 @@ export function getRandomStories(length = 20) {
 
         values.push({
             title,
-            description,
+            desc: description,
             date,
             rcIdx,
             read,

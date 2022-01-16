@@ -10,6 +10,9 @@ import {
     IDStorage,
     IDSettingsMore,
     IDRSSAdd,
+    IDSupportSpecs,
+    IDRSSDetail,
+    IDStoryDetail,
 } from './pages/IDSymbols.js';
 import Story from './pages/story';
 import RSS from './pages/rss';
@@ -18,6 +21,9 @@ import About from './pages/about';
 import Storage from './pages/settings/storage';
 import SettingsMore from './pages/settings/more';
 import RSSAdd from './pages/rss/add';
+import SupportSpecs from './pages/rss/support-specs';
+import RSSDetail from './pages/rss/detail';
+import StoryDetail from './pages/story/detail';
 
 export default function registerRoutes() {
     register(TABStory, Story);
@@ -27,6 +33,9 @@ export default function registerRoutes() {
     register(IDStorage, Storage);
     register(IDSettingsMore, SettingsMore);
     register(IDRSSAdd, RSSAdd);
+    register(IDSupportSpecs, SupportSpecs);
+    register(IDRSSDetail, RSSDetail);
+    register(IDStoryDetail, StoryDetail);
 }
 
 /** Simply register (reduce code) */

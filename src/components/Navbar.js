@@ -15,6 +15,7 @@ import Text from './SText.js';
 import { AppContext } from '../AppContext.js';
 import { TouchHighlight } from './Touchable.js';
 import Option from './ModalSelectOption.js';
+import Perf from '../utils/Perf.js';
 
 const TDATA = [{
     text: '分享',
@@ -26,6 +27,7 @@ const TDATA = [{
     text: '问题反馈',
     icon: <Ionicon name="checkmark" size={20} />,
 }];
+const HEIGHT = 48;
 
 /**
  * App navigation bar
@@ -34,7 +36,7 @@ export default function Navbar(props) {
     const {
         title,
         rightViews,
-        menus = TDATA,
+        menus = [],
         onMenuPress,
         borderless,
     } = props;
@@ -44,9 +46,7 @@ export default function Navbar(props) {
 
     const onBackPress = () => {
         Navigation.pop('root').catch((e) => {
-            if (__DEV__) {
-                console.warn(e);
-            }
+            Perf.error(e);
         });
     };
     const onRequestClose = () => {
@@ -68,15 +68,15 @@ export default function Navbar(props) {
         <>
             <View style={[css.body, !borderless && { borderColor: theme.borderColor }]}>
                 <TouchHighlight onPress={onBackPress}>
-                    <View style={[css.back, { padding: typo.padding }]}>
+                    <View style={[css.back, { paddingHorizontal: typo.padding }]}>
                         <SimpleLineIcon name="arrow-left" size={typo.fontSize} color={theme.fontColor} />
                     </View>
                 </TouchHighlight>
-                <Text style={css.title}>{title}</Text>
+                <Text style={css.title} numberOfLines={1}>{title}</Text>
                 {rightViews}
                 {menus.length > 0 && (
                     <TouchHighlight onPress={() => setOpen(true)}>
-                        <View style={[css.options, { padding: typo.padding }]}>
+                        <View style={css.options}>
                             <Ionicon name="ellipsis-vertical" size={typo.fontSize + 4} color={theme.fontColor} />
                         </View>
                     </TouchHighlight>
@@ -105,6 +105,7 @@ export default function Navbar(props) {
         </>
     );
 }
+Navbar.HEIGHT = HEIGHT;
 
 const css = StyleSheet.create({
     body: {
@@ -115,6 +116,16 @@ const css = StyleSheet.create({
     title: {
         flex: 1,
         flexShrink: 1,
+    },
+    back: {
+        height: HEIGHT,
+        justifyContent: 'center',
+    },
+    options: {
+        width: HEIGHT,
+        height: HEIGHT,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     optionsMenu: {
         position: 'absolute',

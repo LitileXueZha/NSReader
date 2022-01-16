@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import fs from 'react-native-fs';
+import { Navigation } from 'react-native-navigation';
 
 import Text from '../../../components/SText.js';
 import Navbar from '../../../components/Navbar.js';
@@ -20,6 +21,8 @@ import Link from '../../../components/Link.js';
 import Logs from './Logs.js';
 import parseRSS from '../../../utils/RSSParser.js';
 import MRSS, { RSS_ADD_DLP } from '../../../models/RSS.js';
+import Perf from '../../../utils/Perf.js';
+import { IDSupportSpecs } from '../../IDSymbols.js';
 
 const REQUIRED = ['title', 'date', 'description'];
 
@@ -110,11 +113,11 @@ export default class RSSAdd extends Component {
             const errorMsg = [];
 
             REQUIRED.forEach((key) => {
-                if (key in data) return;
+                // if (key in data) return;
+                if (data[key]) return;
                 errorMsg.push(`缺少 ${key}`);
             });
             if (errorMsg.length === 0) {
-                this.showResult({ success: true });
                 this.logRef.current.write(spec);
                 // Finally successful, hu~
                 this.save(data);
@@ -135,7 +138,17 @@ export default class RSSAdd extends Component {
     }
 
     save = (data) => {
-        MRSS.create(this.URL, data);
+        MRSS.create(this.URL, data)
+            .then(() => {
+                this.showResult({ success: true });
+                // setTimeout(() => {
+                //     Navigation.pop('root');
+                // }, 1000);
+            })
+            .catch((e) => {
+                this.showResult({ success: false });
+                Perf.error(e);
+            });
     }
 
     showResult = (result) => {
@@ -193,7 +206,7 @@ export default class RSSAdd extends Component {
                                 size={36}
                             />
                             <Text>{result.success ? '保存成功' : '出了点小问题'}</Text>
-                            {result.support && <Link>查看支持的RSS源格式</Link>}
+                            {result.support && <Link to={IDSupportSpecs}>查看支持的RSS源格式</Link>}
                             {result.detail && (
                                 <Button boxStyle={{ marginTop: typo.margin }} onPress={this.onDetailPress} outline>
                                     详细信息

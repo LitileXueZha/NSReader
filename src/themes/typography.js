@@ -27,7 +27,7 @@ export default {
             marginBottom: MARGIN / GOLD_RATIO,
             fontSize: FONT_SIZE * 1.5,
             lineHeight: FONT_SIZE * 1.5 * 1.375,
-            fontWeight: '600',
+            fontWeight: 'bold',
         },
         h2: {
             marginBottom: MARGIN / GOLD_RATIO,

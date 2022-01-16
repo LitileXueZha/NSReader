@@ -44,6 +44,11 @@ export function doFilter(stories, filterValues) {
     if (last) {
         answer = answer.reverse();
     }
+    // Add a flag for past
+    const past = answer.find((item) => item.date < todayTs);
+    if (past) {
+        past.flagPast = true;
+    }
 
     return answer;
 }

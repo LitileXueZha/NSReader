@@ -18,8 +18,10 @@ import SourceItem from './SourceItem.js';
 import { getRandomSources } from '../../utils/randomize.js';
 import Empty from '../../components/Empty.js';
 import Button from '../../components/Button.js';
-import { IDRSSAdd } from '../IDSymbols.js';
+import { IDRSSAdd, IDRSSDetail } from '../IDSymbols.js';
 import Touchable from '../../components/Touchable.js';
+import MRSS from '../../models/RSS.js';
+import format from '../../utils/format.js';
 
 const TDATA = [
     { title: '奇客Solidot–传递最新科技情报', date: new Date(), description: '奇客的知识，重要的东西。', rcIdx: 2, enabled: true },
@@ -31,7 +33,7 @@ class RSS extends Component {
     constructor() {
         super();
         this.state = {
-            sources: [],
+            sources: Object.values(MRSS.data),
             refreshing: false,
         };
     }
@@ -40,6 +42,11 @@ class RSS extends Component {
         // setTimeout(() => {
         //     this.setState({ sources: getRandomSources(20) });
         // }, 1000);
+        if (!MRSS.initialized) {
+            MRSS.init().then(() => this.setState({
+                sources: Object.values(MRSS.data),
+            }));
+        }
     }
 
     onRefresh = () => {
@@ -56,7 +63,16 @@ class RSS extends Component {
     };
 
     onSourcePress = (index) => {
-        Alert.alert(String(index));
+        const { sources } = this.state;
+        const { id } = sources[index];
+        Navigation.push('root', {
+            component: {
+                name: IDRSSDetail,
+                passProps: {
+                    route: { id },
+                },
+            },
+        });
     }
 
     onToggleEnabled = (enabled, item) => {
@@ -99,7 +115,9 @@ class RSS extends Component {
                         <View style={{ paddingHorizontal: typo.padding, marginBottom: typo.margin }}>
                             <View style={{ marginVertical: typo.margin }}>
                                 <Text style={[css.update, { color: theme.fontColorSecond }]}>最后更新于</Text>
-                                <Text style={[css.update, { color: theme.fontColorSecond }]}>{new Date().toLocaleString()}</Text>
+                                <Text style={[css.update, { color: theme.fontColorSecond }]}>
+                                    {format.date(new Date(), true)}
+                                </Text>
                             </View>
                             <View style={css.info}>
                                 <Text secondary>{`共 ${sources.length} 项`}</Text>

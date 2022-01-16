@@ -55,6 +55,10 @@ class RSSSource {
         Perf.info('RSSSource initialized');
     }
 
+    /**
+     * @param {string} url
+     * @param {object} data parsed rss data
+     */
     async create(url, data) {
         const id = MD5(url).toString();
         const dataPath = `${RSS_DIR}/${id}`;
@@ -82,6 +86,11 @@ class RSSSource {
         MStory.append(data.story, rssItem);
     }
 
+    /**
+     * Fetch a rss source from remote origin
+     * 
+     * @param {string} id
+     */
     async fetch(id) {
         const { url } = this.data[id];
         const ac = new AbortController();
@@ -111,7 +120,7 @@ class RSSSource {
         }
         const rssMetadata = this._getMetadata(data);
         await this.update(id, rssMetadata);
-        MStory.append(data.story, rssMetadata);
+        MStory.append(data.story, { ...rssMetadata, id, url });
     }
 
     async fetchAll() {
@@ -125,11 +134,71 @@ class RSSSource {
         });
     }
 
+    /**
+     * Update on local
+     * 
+     * @param {string} id
+     * @param {object} data
+     */
     async update(id, data = {}) {
         if (!this.data[id]) {
             return;
         }
         await this._saveWork({ ...this.data[id], ...data });
+    }
+
+    /**
+     * Delete a rss source
+     * 
+     * There are a series of works:
+     * + delete rss memory
+     * + delete rss data files
+     * + delete story list memory
+     * + delete story list cache files
+     * @param {string} id
+     */
+    async delete(id) {
+        if (!this.data[id]) {
+            return;
+        }
+        delete this.data[id];
+        await fs.unlink(`${RSS_DIR}/${id}`);
+        MStory.delete(id);
+    }
+
+    /**
+     * Parse the saved rss files
+     */
+    async parseLocalStory() {
+        const ids = Object.keys(this.data);
+        if (ids.length === 0) return;
+        Perf.start();
+        const dirTasks = ids.map((name) => fs.readDir(`${RSS_DIR}/${name}`));
+        const dirs = await Promise.all(dirTasks);
+        const self = this;
+
+        await readLocalRSS(0);
+
+        async function readLocalRSS(i) {
+            if (i >= dirs.length) {
+                Perf.info('RSS xml parsed (local)');
+                return;
+            }
+
+            const id = ids[i];
+            const xmlFiles = dirs[i].filter((v) => v.name !== RSS_INDEX);
+            const readTasks = xmlFiles.map((xml) => fs.readFile(xml.path));
+            const contents = await Promise.all(readTasks);
+
+            for (let j = 0, len = xmlFiles.length; j < len; j++) {
+                const { mtime } = xmlFiles[j];
+                const result = parseRSS(contents[j]);
+                if (result.ok) {
+                    MStory.append(result.data.story, self.data[id]);
+                }
+            }
+            await readLocalRSS(i + 1);
+        }
     }
 
     async _saveWork(data) {

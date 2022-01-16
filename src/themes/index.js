@@ -34,6 +34,8 @@ export const themes = {
         bgPaperInset: light.scale.gray[1],
         // bgDisabled: light.neutral.muted,
         bgRSSHelp: light.success.subtle,
+        bgStoryFlag: light.attention.muted,
+        bgStoryDetailOnRSS: light.canvas.subtle,
 
         /**
          * Several colors
@@ -74,6 +76,8 @@ export const themes = {
         bgPaperInset: dark.scale.black,
         // bgDisabled: dark.neutral.muted,
         bgRSSHelp: dark.success.subtle,
+        bgStoryFlag: dark.attention.muted,
+        bgStoryDetailOnRSS: dark.canvas.subtle,
 
         randomColors: [
             dark.neutral.emphasis,

@@ -61,7 +61,6 @@ function Topbar(props) {
     };
     const onPickClose = (idx) => {
         setPickVisible(false);
-        console.log(idx);
     };
     const [filter, setFilter] = useFilter(data?.filter);
     const onFilterPress = (type) => {

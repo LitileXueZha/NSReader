@@ -30,14 +30,19 @@ import StoryItem from './StoryItem.js';
 import { doFilter } from './useFilter.js';
 import Empty from '../../components/Empty.js';
 import Link from '../../components/Link.js';
+import MRSS from '../../models/RSS.js';
+import MStory from '../../models/Story.js';
+import Perf from '../../utils/Perf.js';
+import { IDStoryDetail } from '../IDSymbols.js';
+import ScrollToTop, { setScrollTop } from '../../components/ScrollToTop.js';
 
 
 class Story extends Component {
     constructor() {
         super();
-        this.stories = getRandomStories(0);
+        this.stories = MStory.data;
         this.state = {
-            status: STATUS_LOADING,
+            status: MStory.initialized ? STATUS_DONE : STATUS_LOADING,
             // status: STATUS_DONE,
             refreshing: false,
             stories: [],
@@ -47,16 +52,41 @@ class Story extends Component {
                 today: AppSettings.get('story.filter.today'),
                 last: AppSettings.get('story.sort.last'),
             },
+            scrollTop: false,
         };
+        this.scrollRef = React.createRef();
+        this.onScroll = setScrollTop.bind(this);
         this.state.stories = doFilter(this.stories, this.state.extraData);
     }
 
     componentDidMount() {
-        setTimeout(() => this.setState({ status: STATUS_DONE }), 1500);
+        this.setup();
     }
 
-    onRefresh = () => {
+    setup = async () => {
+        if (MStory.initialized) return;
+
+        try {
+            await MRSS.init();
+            await MStory.init();
+            this.stories = MStory.data;
+
+            const { extraData } = this.state;
+            const stories = doFilter(this.stories, extraData);
+            this.setState({ stories, status: STATUS_DONE });
+        } catch (e) {
+            Perf.error(e);
+        }
+    }
+
+    onRefresh = async () => {
         this.setState({ refreshing: true });
+        const storyCached = await MStory.existCache();
+        // Cache cleared or after backup
+        if (!storyCached) {
+            await MRSS.init();
+            await MRSS.parseLocalStory();
+        }
         setTimeout(() => {
             this.stories = getRandomStories(500);
             this.setState({
@@ -89,7 +119,7 @@ class Story extends Component {
             });
         });
 
-        const intValue = value ? 1 : 0;
+        const intValue = +value;
         switch (type) {
             case 'summary':
                 AppSettings.store('story.filter.summary', intValue);
@@ -108,49 +138,73 @@ class Story extends Component {
         }
     }
 
+    onEndReached = async (info) => {
+        if (!MStory.more) return;
+
+        const { id } = this.stories[this.stories.length - 1];
+        await MStory.load(id);
+        this.stories = MStory.data;
+        const { extraData } = this.state;
+        const stories = doFilter(this.stories, extraData);
+        this.setState({ stories });
+    }
+
+    onStoryPress = (item) => {
+        const index = this.stories.findIndex((v) => v.id === item.id);
+        Navigation.push('root', {
+            component: {
+                name: IDStoryDetail,
+                passProps: { route: { index } },
+            },
+        });
+    }
+
+    onScrollTop = () => {
+        this.scrollRef.current.scrollToOffset({ offset: 0 });
+    }
+
     renderItem = ({ item, index }) => {
         const { extraData } = this.state;
+        let flagIndex = index > 0 && index % 20 === 0 && index;
+        if (index === 0 && item.flagPast) {
+            // flagPast is added in `doFilter`
+            delete item.flagPast;
+        } else if ((index > 0 && index % 20 === 0) || item.flagPast) {
+            flagIndex = index;
+        }
         return (
             <StoryItem
-                key={item.title}
+                key={item.id}
                 data={item}
+                flagIndex={flagIndex}
                 hideSummary={!extraData.summary}
-                onPress={() => Navigation.push('root',{component:{name:'settings'}})}
+                onPress={this.onStoryPress}
             />
         );
     };
 
     render() {
         const { theme, typo } = this.context;
-        const { status, refreshing, stories, extraData } = this.state;
+        const { status, refreshing, stories, extraData, scrollTop } = this.state;
 
         return (
             <View style={css.container}>
                 <FlatList
+                    ref={this.scrollRef}
+                    onScroll={this.onScroll}
                     data={stories}
                     extraData={extraData}
                     renderItem={this.renderItem}
                     refreshing={refreshing}
                     onRefresh={this.onRefresh}
                     progressViewOffset={TOPBAR_SPACE}
+                    onEndReached={this.onEndReached}
                     contentContainerStyle={[css.list, stories.length === 0 && { flex: 1 }]}
                     ListFooterComponent={stories.length > 0 && (
-                        <View style={{ padding: typo.padding }}>
-                            <Text>Story</Text>
-                            <View>
-                                <Text>{JSON.stringify(this.context, null ,2)}</Text>
-                            </View>
-                            <TouchableHighlight onPress={() => Alert.alert('1')}>
-                                <View style={{ elevation: 1,borderWidth:0, padding: typo.padding, backgroundColor: '#dddddd' }}>
-                                    <Text>touchable</Text>
-                                </View>
-                            </TouchableHighlight>
-                            <Touchable onPress={this.sendNotification}>
-                                <View style={{ padding: typo.padding }}>
-                                    <Text>发送通知</Text>
-                                </View>
-                            </Touchable>
-                            <Button title="第二个页面" onPress={() => Navigation.push('root',{component:{name:'settings'}})} />
+                        <View style={{ padding: typo.padding + 4, marginTop: typo.margin * 2 }}>
+                            <Text style={{ fontSize: typo.fontSizeSmall, textAlign: 'center' }} secondary>
+                                {MStory.more ? '正在读取更多\n...' : '结尾了'}
+                            </Text>
                         </View>
                     )}
                     ListEmptyComponent={(
@@ -176,6 +230,7 @@ class Story extends Component {
                     overScrollMode="always"
                 />
                 <Topbar status={status} data={{ filter: extraData }} onFilter={this.onFilter} />
+                <ScrollToTop visible={scrollTop} onPress={this.onScrollTop} />
             </View>
         );
     }

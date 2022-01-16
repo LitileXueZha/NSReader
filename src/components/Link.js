@@ -8,6 +8,7 @@ import { TouchHighlight } from './Touchable.js';
 import { tabIDs } from '../pages/IDSymbols.js';
 import aps from '../AppSettings.js';
 import { themes } from '../themes/index.js';
+import Perf from '../utils/Perf.js';
 
 
 /**
@@ -18,19 +19,28 @@ import { themes } from '../themes/index.js';
  * 3. web url which starts with `http`
  * 
  * In others case, call `Linking.openURL` directly.
+ * 
+ * @param {import('react-native').TextProps} props
  */
 export default function Link(props) {
-    const { children, style, to, data = {} } = props;
+    const {
+        children,
+        style,
+        to,
+        underline,
+        data = {},
+    } = props;
     const { typo, theme } = useContext(AppContext);
     const linkStyles = {
         color: theme.linkColor,
         fontSize: typo.fontSize,
         lineHeight: typo.fontHeight,
+        textDecorationLine: underline ? 'underline' : 'none',
     };
     const onPress = () => {
         // Switch tab
-        if (tabIDs.indexOf(to) > -1) {
-            Navigation.mergeOptions(tabIDs[0], {
+        if (to && tabIDs.indexOf(to) > -1) {
+            Navigation.mergeOptions('id_bottomTabs', {
                 bottomTabs: { currentTabId: to },
             });
             return;
@@ -45,12 +55,12 @@ export default function Link(props) {
                             route: data,
                         },
                     },
-                });
+                }).catch(Perf.error);
                 return;
             }
             // Open web url
             if (to.startsWith('http')) {
-                openLink(to);
+                openLink(to).catch(Perf.error);
             }
         }
     };
@@ -74,12 +84,11 @@ export function openLink(url) {
         const theme = aps.get('theme');
         const { background } = themes[theme];
 
-        InAppBrowser.open(url, {
+        return InAppBrowser.open(url, {
             showTitle: true,
             showInRecents: false,
             toolbarColor: background,
         });
-        return;
     }
-    Linking.openURL(url);
+    return Linking.openURL(url);
 }

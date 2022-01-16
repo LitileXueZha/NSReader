@@ -22,9 +22,10 @@ class Formatter {
      * + in past years => `2010/01/31`
      * 
      * @param {string|Date} datetime
+     * @param {boolean} entire show entire date, eg: `2010/10/02 14:00`
      * @returns {string}
      */
-    date(datetime) {
+    date(datetime, entire = false) {
         const rawDate = new Date(datetime);
         const strs = [
             rawDate.getFullYear(),
@@ -33,6 +34,12 @@ class Formatter {
             rawDate.getHours(),
             rawDate.getMinutes(),
         ];
+
+        if (entire) {
+            const [YYYY, MM, DD, hh, mm] = strs.map(padZeroStart);
+            return `${YYYY}/${MM}/${DD} ${hh}:${mm}`;
+        }
+
         const currDate = new Date();
         const currYear = currDate.getFullYear();
 
@@ -44,10 +51,11 @@ class Formatter {
                     .join('/');
             }
             // Today => 09:02
-            return strs
+            const str = strs
                 .slice(3)
                 .map(padZeroStart)
                 .join(':');
+            return `今天 ${str}`;
         }
         // In past years => 2010/01/31
         return strs.slice(0, 3)

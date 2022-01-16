@@ -5,6 +5,7 @@ import { TouchHighlight } from '../../components/Touchable.js';
 import Text from '../../components/SText.js';
 import { AppContext } from '../../AppContext.js';
 import format from '../../utils/format.js';
+import Favicon from '../../components/Favicon.js';
 
 function SourceItem(props) {
     const { data, onPress, onToggleEnabled } = props;
@@ -67,7 +68,7 @@ function SourceItem(props) {
                             )}
                         </View>
                     </View>
-                    <View style={{backgroundColor:theme.randomColors[data.rcIdx],width:48,height:48,borderRadius:4}} />
+                    <Favicon id={data.id} size={48} radius={4} />
                 </View>
                 <Text style={[disabledStyles, { lineHeight: typo.fontSize * 1.15 }]} numberOfLines={3}>
                     {data.description}
@@ -89,6 +90,7 @@ const css = StyleSheet.create({
     richText: {
         flex: 1,
         paddingTop: 4,
+        marginRight: 4,
     },
     hint: {
         flexDirection: 'row',
