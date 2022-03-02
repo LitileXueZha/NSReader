@@ -17,6 +17,7 @@ function ModalSelectOption(props) {
         onPress,
         active,
         border,
+        removeIcon,
     } = props;
     const { theme, typo } = useContext(AppContext);
     const memoStyles = useMemo(() => ({
@@ -37,13 +38,17 @@ function ModalSelectOption(props) {
             <View style={memoStyles.row}>
                 <View style={memoStyles.value}>
                     <Text style={css.text}>{data.text}</Text>
-                    {data.badge && (
+                    {data.badge !== undefined && (
                         <Badge text={data.badge} />
                     )}
                 </View>
-                {data.icon}
-                {!data.icon && active && (
-                    <Icon name="checkmark" size={typo.mSize} color={theme.fontColor} />
+                {removeIcon || data.icon || (
+                    <Icon
+                        name="checkmark"
+                        size={typo.mSize}
+                        color={theme.fontColor}
+                        style={[{ marginLeft: typo.margin }, !active && { opacity: 0 }]}
+                    />
                 )}
             </View>
         </Touchable>
@@ -57,11 +62,11 @@ const css = StyleSheet.create({
         justifyContent: 'space-between',
     },
     value: {
-        marginLeft: 4,
+        paddingHorizontal: 4,
         flexShrink: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        minHeight: 26,
+        minHeight: 24,
     },
     text: {
         flexShrink: 1,

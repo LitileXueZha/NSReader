@@ -16,18 +16,18 @@ function SText(props) {
         ...restProps
     } = props;
     const { theme, typo } = useContext(AppContext);
-    const textStyles = [{
+    const textStyle = {
         color: theme.fontColor,
         fontSize: typo.fontSize,
         lineHeight: typo.fontHeight,
-    }];
+    };
 
     if (secondary) {
-        textStyles[0].color = theme.fontColorSecond;
+        textStyle.color = theme.fontColorSecond;
     }
 
     return (
-        <Text style={[textStyles, style]} {...restProps}>
+        <Text style={[textStyle, style]} {...restProps}>
             {children}
         </Text>
     );

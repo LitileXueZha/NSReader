@@ -7,8 +7,9 @@ import { insertStoryTo } from './Story.util.js';
 import { Event } from '../utils/Event.js';
 
 const SL_DIR = `${fs.CachesDirectoryPath}/story`;
+const SL_DIR_JSOND = `${SL_DIR}/jsond`;
 const SL_DIR_HTML = `${SL_DIR}/html`;
-const SL_IDS = 'ids';
+const SL_IDS = `${SL_DIR}/ids`;
 const ZERO = `${SL_DIR}/0`;
 
 const MAX = 100;
@@ -38,7 +39,7 @@ class StoryList extends Event {
         this.initialized = true;
         Perf.start();
         try {
-            const files = [ZERO, `${SL_DIR}/${SL_IDS}`];
+            const files = [ZERO, SL_IDS];
             const readTasks = files.map((f) => fs.readFile(f));
             const results = await Promise.all(readTasks);
             const [rawData, rawIds] = results;
@@ -49,6 +50,7 @@ class StoryList extends Event {
         } catch (e) {
             // await fs.mkdir(SL_DIR);
             await fs.mkdir(SL_DIR_HTML);
+            await fs.mkdir(SL_DIR_JSOND);
         }
         Perf.info('StoryList initialized');
     }
@@ -58,8 +60,9 @@ class StoryList extends Event {
      * 
      * @param {array} list stories
      * @param {object} rss parent rss source
+     * @param {Date} mtime
      */
-    async append(list, rss) {
+    async append(list, rss, mtime) {
         await this.init();
         if (list.length === 0) {
             return;
@@ -93,7 +96,7 @@ class StoryList extends Event {
                         .replace('&quot;', '"')
                         .replace('&nbsp;', ' ');
                 // If date is undefined, set it as the time of added
-                let ts = new Date(date).getTime() || (Date.now() - i);
+                let ts = new Date(date).getTime() || mtime?.getTime() || (Date.now() - i);
                 // Some rss sources publish a series of stories which has the same date.
                 // It will affect load more, because this feature is based on the date,
                 // same date will cause duplicate story in list.
@@ -118,15 +121,25 @@ class StoryList extends Event {
                 }
                 newStories.push(storyItem);
                 this._ids[pid].list.push(id);
-                this._cacheQueue.push(createWriteTask(`${SL_DIR}/${ts}${id}`, storyItem));
+                this._cacheQueue.push(createWriteTask(`${SL_DIR_JSOND}/${ts}${id}`, storyItem));
                 this._cacheQueue.push(createWriteTask(`${SL_DIR_HTML}/${id}.html`, description));
             }
         }
         if (newStories.length > 0) {
             this._ids[pid].latest = usedList.map((item) => item.title);
             const sortStories = newStories.sort((a, b) => b.date - a.date);
-            this.data = insertStoryTo(sortStories, this.data);
-            this._cacheQueue.push(createWriteTask(`${SL_DIR}/${SL_IDS}`, this._ids));
+            let insertedData = insertStoryTo(sortStories, this.data);
+            const lastItem = this.data[this.data.length - 1];
+            if (lastItem) {
+                // Appended stories which older than the last one in list will break
+                // StoryList load more. Remove them.
+                const lastIdx = insertedData.findIndex((v) => v.id === lastItem.id);
+                if (lastIdx > -1) {
+                    insertedData = insertedData.slice(0, lastIdx + 1);
+                }
+            }
+            this.data = insertedData;
+            this._cacheQueue.push(createWriteTask(SL_IDS, this._ids));
             this._cacheQueue.push(createWriteTask(ZERO, this.data.slice(0, MAX)));
             this.mkCache();
             this.emit('storychange');
@@ -144,7 +157,7 @@ class StoryList extends Event {
         if (index > -1) {
             const updateData = { ...this.data[index], ...data };
             this.data[index] = updateData;
-            this._cacheQueue.push(createWriteTask(`${SL_DIR}/${updateData.date}${id}`, updateData));
+            this._cacheQueue.push(createWriteTask(`${SL_DIR_JSOND}/${updateData.date}${id}`, updateData));
             if (index < MAX) {
                 this._cacheQueue.push(createWriteTask(ZERO, this.data.slice(0, MAX)));
             }
@@ -159,17 +172,20 @@ class StoryList extends Event {
      */
     async delete(pid) {
         this.data = this.data.filter((v) => v.pid !== pid);
-        const ids = this._ids[pid].list;
+        const deleteItem = this._ids[pid];
         delete this._ids[pid];
-        this._cacheQueue.push(createWriteTask(`${SL_DIR}/${SL_IDS}`, this._ids));
+        this._cacheQueue.push(createWriteTask(SL_IDS, this._ids));
         this._cacheQueue.push(createWriteTask(ZERO, this.data.slice(0, MAX)));
         this.mkCache();
         this.emit('storychange');
-        const dirs = await fs.readDir(SL_DIR);
-        for (const file of dirs) {
-            const id = file.name.substring(13); // 13 is timestamp length
-            if (ids.indexOf(id) > -1) {
-                fs.unlink(file.path).catch(Perf.error);
+        if (deleteItem) {
+            const ids = deleteItem.list;
+            const dirs = await fs.readDir(SL_DIR_JSOND);
+            for (const file of dirs) {
+                const id = file.name.substring(13); // 13 is timestamp length
+                if (ids.indexOf(id) > -1) {
+                    fs.unlink(file.path).catch(Perf.error);
+                }
             }
         }
     }
@@ -186,17 +202,16 @@ class StoryList extends Event {
         Perf.start();
         const LEN = 13; // timestamp length
         const LEN_NAME = LEN + ID_LENGTH;
-        const files = await fs.readdir(SL_DIR);
+        const files = await fs.readdir(SL_DIR_JSOND);
         const sortFiles = files.sort((a, b) => b.substr(0, LEN) - a.substr(0, LEN));
         let start = false;
         const readFiles = [];
 
         for (let i = 0, len = sortFiles.length; i < len; i++) {
             const file = sortFiles[i];
-            if (start && file.length === LEN_NAME && readFiles.length < size) {
+            if (start && readFiles.length < size) {
                 readFiles.push(file);
-            }
-            if (!start && file.substring(LEN) === nextId) {
+            } else if (!start && file.substring(LEN) === nextId) {
                 start = true;
             }
         }
@@ -213,13 +228,13 @@ class StoryList extends Event {
                 return;
             }
             try {
-                const content = await fs.readFile(`${SL_DIR}/${readFiles[i]}`);
+                const content = await fs.readFile(`${SL_DIR_JSOND}/${readFiles[i]}`);
                 const story = JSON.parse(content);
                 self.data.push(story);
             } catch (e) {
                 Perf.error(e);
             }
-            await read(i + 1);
+            return read(i + 1);
         }
     }
 
@@ -272,20 +287,21 @@ class StoryList extends Event {
 
     async diskUsage() {
         let bytes = 0;
+        const countSize = async (dir) => {
+            const dirFiles = await fs.readDir(dir);
+            const subDirs = [];
+            for (const file of dirFiles) {
+                if (file.isFile()) {
+                    bytes += file.size;
+                } else if (file.isDirectory()) {
+                    subDirs.push(file.path);
+                }
+            }
+            await Promise.all(subDirs.map(countSize));
+        };
 
         try {
-            const dirs = await fs.readDir(SL_DIR);
-            const htmlDirs = await fs.readDir(SL_DIR_HTML);
-            for (const file of dirs) {
-                if (file.path === SL_DIR_HTML) {
-                    // Duplicate
-                    continue;
-                }
-                bytes += file.size;
-            }
-            for (const html of htmlDirs) {
-                bytes += html.size;
-            }
+            await countSize(SL_DIR);
         } catch (e) { /**/ }
 
         return { bytes };
@@ -295,6 +311,7 @@ class StoryList extends Event {
         await fs.unlink(SL_DIR);
         // Re-create dir for pending tasks in _cacheQueue
         await fs.mkdir(SL_DIR_HTML);
+        await fs.mkdir(SL_DIR_JSOND);
     }
 }
 

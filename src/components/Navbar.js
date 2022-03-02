@@ -7,32 +7,31 @@ import {
     Pressable,
     StatusBar,
 } from 'react-native';
-import { Navigation } from 'react-native-navigation';
-import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
-import Ionicon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import Text from './SText.js';
 import { AppContext } from '../AppContext.js';
 import { TouchHighlight } from './Touchable.js';
 import Option from './ModalSelectOption.js';
 import Perf from '../utils/Perf.js';
+import { goBack } from './Link.js';
 
 const TDATA = [{
     text: '分享',
 }, {
     text: '在浏览器打开',
     disabled: true,
-    icon: <Ionicon name="cloud-done" size={20} />,
+    icon: <Icon name="cloud-done" size={20} />,
 }, {
     text: '问题反馈',
-    icon: <Ionicon name="checkmark" size={20} />,
+    icon: <Icon name="checkmark" size={20} />,
 }];
-const HEIGHT = 48;
+const HEIGHT = 52;
 
 /**
  * App navigation bar
  */
-export default function Navbar(props) {
+function NavbarFC(props) {
     const {
         title,
         rightViews,
@@ -44,11 +43,6 @@ export default function Navbar(props) {
     const [open, setOpen] = useState(false);
     const [visible, setVisible] = useState(false);
 
-    const onBackPress = () => {
-        Navigation.pop('root').catch((e) => {
-            Perf.error(e);
-        });
-    };
     const onRequestClose = () => {
         setVisible(false);
         setOpen(false);
@@ -59,25 +53,25 @@ export default function Navbar(props) {
     };
     const onModalShow = () => {
         LayoutAnimation.configureNext(
-            LayoutAnimation.create(250, 'easeOut', 'opacity'),
+            LayoutAnimation.create(250, 'easeOut', 'scaleXY'),
         );
         setVisible(true);
     };
 
     return (
         <>
-            <View style={[css.body, !borderless && { borderColor: theme.borderColor }]}>
-                <TouchHighlight onPress={onBackPress}>
-                    <View style={[css.back, { paddingHorizontal: typo.padding }]}>
-                        <SimpleLineIcon name="arrow-left" size={typo.fontSize} color={theme.fontColor} />
+            <View style={[css.body, !borderless && { borderColor: theme.borderColor }, { paddingHorizontal: typo.padding }]}>
+                <TouchHighlight onPress={goBack} style={{ left: -typo.padding / 2, borderRadius: 6 }}>
+                    <View style={css.iconBtn}>
+                        <Icon name="chevron-back" size={typo.mSize} color={theme.fontColor} />
                     </View>
                 </TouchHighlight>
                 <Text style={css.title} numberOfLines={1}>{title}</Text>
                 {rightViews}
                 {menus.length > 0 && (
-                    <TouchHighlight onPress={() => setOpen(true)}>
-                        <View style={css.options}>
-                            <Ionicon name="ellipsis-vertical" size={typo.fontSize + 4} color={theme.fontColor} />
+                    <TouchHighlight onPress={() => setOpen(true)} style={{ right: -typo.padding / 2, borderRadius: 6 }}>
+                        <View style={css.iconBtn}>
+                            <Icon name="ellipsis-vertical" size={typo.fontSize + 4} color={theme.fontColor} />
                         </View>
                     </TouchHighlight>
                 )}
@@ -97,6 +91,7 @@ export default function Navbar(props) {
                                 key={item.text}
                                 data={item}
                                 onPress={() => onOptionPress(index)}
+                                removeIcon
                             />
                         ))}
                     </View>
@@ -105,35 +100,32 @@ export default function Navbar(props) {
         </>
     );
 }
-Navbar.HEIGHT = HEIGHT;
 
 const css = StyleSheet.create({
     body: {
         flexDirection: 'row',
         alignItems: 'center',
+        height: HEIGHT,
         borderBottomWidth: StyleSheet.hairlineWidth,
     },
     title: {
         flex: 1,
         flexShrink: 1,
+        fontWeight: '600',
     },
-    back: {
-        height: HEIGHT,
-        justifyContent: 'center',
-    },
-    options: {
-        width: HEIGHT,
-        height: HEIGHT,
+    iconBtn: {
         justifyContent: 'center',
         alignItems: 'center',
+        width: 40,
+        height: 40,
     },
     optionsMenu: {
         position: 'absolute',
-        right: 6,
+        right: 8,
         top: 6 + StatusBar.currentHeight,
         padding: 0.1,
-        borderRadius: 2,
-        elevation: 6,
+        borderRadius: 4,
+        elevation: 3,
         zIndex: 1,
     },
     overlay: {
@@ -142,3 +134,14 @@ const css = StyleSheet.create({
         height: '100%',
     },
 });
+
+function areEqual(prevProps, nextProps) {
+    if (prevProps.title !== nextProps.title || prevProps.menus !== nextProps.menus) {
+        return false;
+    }
+    return true;
+}
+const Navbar = React.memo(NavbarFC, areEqual);
+Navbar.HEIGHT = HEIGHT;
+
+export default Navbar;

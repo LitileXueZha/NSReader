@@ -13,7 +13,8 @@ import Text from '../../components/SText.js';
 import { TouchHighlight } from '../../components/Touchable.js';
 import SettingItem from '../settings/SettingItem.js';
 import Navbar from '../../components/Navbar.js';
-import { openLink } from '../../components/Link.js';
+import { goto, openLink } from '../../components/Link.js';
+import { IDCopyrights } from '../IDSymbols.js';
 
 class About extends Component {
     constructor() {
@@ -24,7 +25,7 @@ class About extends Component {
     shareApp = () => {
         Share.share({
             message: '快来使用这个APP',
-            url: '',
+            url: 'https://github.com/LitileXueZha/NSReader/releases',
             title: 'NSReader',
         });
     }
@@ -33,8 +34,14 @@ class About extends Component {
         openLink('https://github.com/LitileXueZha/NSReader/issues');
     }
 
+    goCopyrights = () => goto(IDCopyrights)
+
     render() {
         const { theme, typo } = this.context;
+        const sectionStyle = {
+            backgroundColor: theme.background,
+            marginTop: typo.margin,
+        };
 
         return (
             <>
@@ -49,7 +56,7 @@ class About extends Component {
                     )}
                 />
                 <ScrollView style={{ flex: 1, backgroundColor: theme.bgPaperInset }}>
-                    <View style={{ backgroundColor: theme.background, marginTop: typo.margin }}>
+                    <View style={sectionStyle}>
                         <SettingItem
                             text="版本"
                             tips={__BUILD__}
@@ -60,12 +67,13 @@ class About extends Component {
                             text="开发者"
                             value="@litilexuezha"
                             disableTouchEffect
+                            borderless
                         />
                     </View>
-                    <View style={{ backgroundColor: theme.background, marginTop: typo.margin }}>
+                    <View style={sectionStyle}>
                         <SettingItem
                             text="检查更新"
-                            icon={<ActivityIndicator />}
+                            loading
                         />
                         <SettingItem
                             type="link"
@@ -76,12 +84,14 @@ class About extends Component {
                         <SettingItem
                             text="捐赠"
                             tips="盼君兮敢吾羞以～"
+                            borderless
                         />
                     </View>
-                    <View style={{ backgroundColor: theme.background, marginTop: typo.margin }}>
+                    <View style={sectionStyle}>
                         <SettingItem
                             type="link"
                             text="开源许可"
+                            onPress={this.goCopyrights}
                         />
                         <SettingItem
                             text="其它贡献者"
@@ -89,6 +99,7 @@ class About extends Component {
                             value="thanks"
                             icon={<Icon name="ribbon" size={typo.mSize} color={theme.fontColorSecond} />}
                             disableTouchEffect
+                            borderless
                         />
                     </View>
                 </ScrollView>

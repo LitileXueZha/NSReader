@@ -26,6 +26,7 @@ export function getDefaultOptions() {
      * a bit fast or slow.
      */
     const ANIM_WINDOW_WIDTH = Dimensions.get('window').width;
+    const easymode = aps.get('settings.easymode');
 
     /** @type {import('react-native-navigation').Options} */
     const DEFAULT_OPTIONS = {
@@ -37,6 +38,7 @@ export function getDefaultOptions() {
             componentBackgroundColor: theme.background,
         },
         bottomTabs: {
+            visible: !easymode,
             backgroundColor: theme.bottomTabsBackground,
             animate: false,
             // animateTabSelection: false,
@@ -156,12 +158,6 @@ export async function loadTabIcons() {
     }
     Navigation.mergeOptions(TABSettings, { bottomTab: cachedIcons.settings });
 }
-// const iconStory = Icon.getImageSourceSync('reader-outline', 128);
-// const iconStoryEd = Icon.getImageSourceSync('reader', 128);
-// const iconRss = Icon.getImageSourceSync('albums-outline', 128);
-// const iconRssEd = Icon.getImageSourceSync('albums', 128);
-// const iconSettings = Icon.getImageSourceSync('settings-outline', 128);
-// const iconSettingsEd = Icon.getImageSourceSync('settings', 128);
 
 const TAB_STORY = {
     /** @type {import('react-native-navigation').LayoutComponent} */
@@ -171,8 +167,6 @@ const TAB_STORY = {
         options: {
             bottomTab: {
                 text: '阅读',
-                // icon: iconStory,
-                // selectedIcon: iconStoryEd,
             },
         },
     },
@@ -185,8 +179,6 @@ const TAB_RSS = {
         options: {
             bottomTab: {
                 text: 'RSS源',
-                // icon: iconRss,
-                // selectedIcon: iconRssEd,
             },
         },
     },
@@ -199,8 +191,6 @@ const TAB_SETTINGS = {
         options: {
             bottomTab: {
                 text: '设置',
-                // icon: iconSettings,
-                // selectedIcon: iconSettingsEd,
             },
         },
     },
@@ -232,7 +222,3 @@ export const DEFAULT_ROOT = {
         },
     },
 };
-
-export default function mergeOptions(newOptions) {
-
-}

@@ -8,6 +8,10 @@
     "story.sort.last": 0,
     "settings.quiet": 0,
     "settings.chrometab": 1,
+    "settings.easymode": 0,
 
+    "experimental.proxy": 0,
+    "experimental.proxy.host": "",
+    "experimental.proxy.port": 0,
     "experimental.rtl": 0
 }

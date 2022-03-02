@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import {
     Alert,
+    Pressable,
     RefreshControl,
     ScrollView,
     StyleSheet,
+    Switch,
     TextInput,
     View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Checkbox from '@react-native-community/checkbox';
-import { Navigation } from 'react-native-navigation';
 
 import Navbar from '../../../components/Navbar.js';
 import Text from '../../../components/SText.js';
@@ -21,7 +22,9 @@ import { GOLD_RATIO } from '../../../themes/typography.js';
 import Favicon from '../../../components/Favicon.js';
 import format from '../../../utils/format.js';
 import Perf from '../../../utils/Perf.js';
-import { openLink } from '../../../components/Link.js';
+import { goBack, openLink } from '../../../components/Link.js';
+import RowInfo from './RowInfo.js';
+import RowAction from './RowAction.js';
 
 class RSSDetail extends Component {
     constructor(props) {
@@ -29,7 +32,6 @@ class RSSDetail extends Component {
         this.source = MRSS.data[props.route?.id];
         this.state = {
             alias: '',
-            enabled: !!this.source?.enabled,
             refreshing: false,
         };
         this.MENUS = [{
@@ -48,9 +50,7 @@ class RSSDetail extends Component {
         if (!this.source) {
             Alert.alert(null, '未知数据', [{
                 text: '返回',
-                onPress: () => {
-                    Navigation.pop('root');
-                },
+                onPress: goBack,
             }]);
         }
     }
@@ -70,7 +70,7 @@ class RSSDetail extends Component {
                         style: 'destructive',
                         onPress: async () => {
                             await MRSS.delete(this.source.id).catch(Perf.error);
-                            Navigation.pop('root');
+                            goBack();
                         },
                     },
                     {
@@ -89,10 +89,9 @@ class RSSDetail extends Component {
     }
 
     onEnabledChange = () => {
-        this.setState({
-            enabled: !this.state.enabled,
-        });
     }
+
+    onDailyChange = () => {}
 
     onRefresh = async () => {
         if (this.source?.id) {
@@ -109,42 +108,14 @@ class RSSDetail extends Component {
 
     render() {
         const { theme, typo } = this.context;
-        const titleStyles = {
-            marginTop: typo.margin,
-            padding: typo.padding,
-            paddingBottom: 4,
-            fontSize: typo.fontSizeSmall,
-        };
-        const rowStyles = [css.row, {
-            padding: typo.padding,
-            paddingVertical: typo.padding + 2,
-        }];
-        const rowBorderStyles = {
-            marginLeft: typo.padding,
-            paddingLeft: 0,
-            borderColor: theme.borderColor,
-            borderBottomWidth: StyleSheet.hairlineWidth,
-        };
-        const urlRowStyles = {
-            marginBottom: typo.margin,
-            borderColor: theme.borderColor,
-            borderBottomWidth: StyleSheet.hairlineWidth,
-        };
-        const labelStyles = {
-            width: typo.fontSize * 6,
-        };
-        const valueStyles = [css.value, {
-            color: theme.fontColorSecond,
-        }];
-        const inputStyles = {
-            // marginRight: typo.padding,
+        const inputStyle = {
             paddingHorizontal: 8,
             paddingVertical: 4,
             color: theme.fontColor,
             fontSize: typo.fontSize,
             lineHeight: typo.fontHeight,
         };
-        const { alias, enabled, refreshing } = this.state;
+        const { refreshing } = this.state;
 
         return (
             <>
@@ -161,84 +132,56 @@ class RSSDetail extends Component {
                     )}
                 />
                 <ScrollView
-                    style={[C.f1, { backgroundColor: theme.bgPaperInset }]}
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={this.onRefresh} />}
+                    style={C.f1}
+                    refreshControl={(
+                        <RefreshControl refreshing={refreshing} onRefresh={this.onRefresh} />
+                    )}
+                    // showsVerticalScrollIndicator={false}
                 >
-                    <View style={[css.editable, { backgroundColor: theme.background, marginTop: typo.margin }]}>
-                        <View style={[rowStyles, urlRowStyles]}>
-                            <Text style={labelStyles}>URL</Text>
-                            <Text style={[valueStyles, { opacity: 0.45 }]} selectable>
-                                {decodeURIComponent(this.source?.url)}
-                            </Text>
+                    <View style={{ margin: typo.margin*2, marginVertical: typo.margin * 2 }}>
+                        <View style={[css.inputWrapper, { borderColor: theme.borderColor, backgroundColor: theme.bgPaperInset }]}>
+                            <TextInput
+                                style={inputStyle}
+                                placeholder={this.source?.title}
+                                placeholderTextColor={theme.fontColorSecond}
+                                defaultValue={this.source?.alias}
+                            />
                         </View>
-                        <View style={[rowStyles, { paddingVertical: 0, marginBottom: 4 }]}>
-                            <Text style={labelStyles}>别名：</Text>
-                            <View style={[css.value, css.inputWrapper, { borderColor: theme.borderColor, backgroundColor: theme.bgPaperInset }]}>
-                                <TextInput
-                                    style={inputStyles}
-                                    placeholder="更改RSS源标题"
-                                    placeholderTextColor={theme.fontColorSecond}
-                                    textAlign="right"
-                                />
-                            </View>
-                        </View>
-                        <Touchable onPress={this.onEnabledChange}>
-                            <View style={[rowStyles, { justifyContent: 'space-between' }]}>
-                                <Text style={labelStyles}>启用</Text>
-                                <Checkbox
-                                    value={enabled}
-                                    onValueChange={this.onEnabledChange}
-                                    tintColors={{
-                                        false: theme.fontColorSecond,
-                                        true: theme.primaryColor,
-                                    }}
-                                    style={{ height: typo.mSize }}
-                                />
-                            </View>
-                        </Touchable>
-                        {/* TODO: 每日更新，设置为每日更新的 rss 源在阅读列表中只查看今天的数据。适用于排行榜等每天更新的源 */}
+                        <Text style={css.tip} secondary>
+                            设置RSS源别名（应用内显示的标题）
+                        </Text>
                     </View>
-                    <Text style={titleStyles} secondary>详细信息</Text>
-                    <View style={[css.more, { backgroundColor: theme.background }]}>
-                        <View style={[rowStyles, rowBorderStyles]}>
-                            <Text style={[labelStyles, { alignSelf: 'flex-start' }]}>标题</Text>
-                            <Text style={valueStyles} selectable>
-                                {this.source?.title}
-                            </Text>
+                    <RowAction
+                        label="启用"
+                        defaultValue={this.source?.enabled}
+                        type="switch"
+                        onPress={this.onEnabledChange}
+                    />
+                    <RowAction
+                        label="每日更新"
+                        tip="设置为每日更新的 RSS 源在阅读列表中只查看今天的数据。适用于排行榜等每天更新的源"
+                        defaultValue={false}
+                        onPress={this.onDailyChange}
+                    />
+                    {/* TODO: 每日更新，设置为每日更新的 RSS 源在阅读列表中只查看今天的数据。适用于排行榜等每天更新的源 */}
+                    <View style={css.area}>
+                        <View style={[css.bubble, { backgroundColor: theme.bgStoryFlag }]}>
+                            <Text style={{ fontSize: typo.fontSizeSmall }} secondary>详细信息</Text>
+                            <View style={[css.corner, { borderTopColor: theme.bgStoryFlag }]} />
                         </View>
-                        <View style={[rowStyles, rowBorderStyles]}>
-                            <Text style={[labelStyles, { alignSelf: 'flex-start' }]}>描述</Text>
-                            <Text style={valueStyles} selectable>
-                                {this.source?.description}
-                            </Text>
-                        </View>
-                        <View style={[rowStyles, rowBorderStyles, css.rowImg]}>
-                            <Text style={labelStyles}>图标</Text>
-                            <Favicon id={this.source?.id} size={78} radius={6} />
-                        </View>
-                        <View style={[rowStyles, rowBorderStyles]}>
-                            <Text style={labelStyles}>发布间隔</Text>
-                            <Text style={valueStyles} selectable>
-                                {
-                                    this.source?.ttl
-                                        ? `${this.source.ttl}分钟`
-                                        : '无数据'
-                                }
-                            </Text>
-                        </View>
-                        <View style={[rowStyles, rowBorderStyles]}>
-                            <Text style={labelStyles}>最后发布于</Text>
-                            <Text style={valueStyles} selectable>
-                                {format.date(this.source?.date, true)}
-                            </Text>
-                        </View>
-                        <View style={rowStyles}>
-                            <Text style={labelStyles}>源格式</Text>
-                            <Text style={valueStyles} selectable>
-                                {this.source?.spec}
-                            </Text>
-                        </View>
-
+                    </View>
+                    <View style={css.more}>
+                        <RowInfo
+                            label="URL"
+                            value={decodeURIComponent(this.source?.url)}
+                            borderless
+                        />
+                        <RowInfo label="标题" value={this.source?.title} />
+                        <RowInfo label="描述" value={this.source?.description} />
+                        <RowInfo label="图标" value={<Favicon id={this.source?.id} size={48} radius={4} />} />
+                        <RowInfo label="发布间隔" value={this.source?.ttl ? `${this.source.ttl}分钟` : '无数据'} />
+                        <RowInfo label="最后发布于" value={format.date(this.source?.date, true)} />
+                        <RowInfo label="源格式" value={this.source?.spec} />
                     </View>
                 </ScrollView>
             </>
@@ -253,25 +196,34 @@ const css = StyleSheet.create({
         width: Navbar.HEIGHT / GOLD_RATIO,
         height: Navbar.HEIGHT,
     },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    value: {
-        flex: 1,
-        flexShrink: 1,
-        textAlign: 'right',
-    },
-    rowImg: {
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-    },
     inputWrapper: {
         // top: -6,
         // borderBottomWidth: 2,
         // backgroundColor: 'rgba(0,0,0,0.02)',
         borderRadius: 6,
         borderWidth: StyleSheet.hairlineWidth,
+    },
+    tip: {
+        fontSize: 12,
+        marginLeft: 8,
+    },
+    area: {
+        flexDirection: 'row',
+        marginTop: 60,
+    },
+    bubble: {
+        padding: 4,
+        paddingHorizontal: 8,
+        marginBottom: 20,
+        marginLeft: 20,
+        borderRadius: 4,
+    },
+    corner: {
+        position: 'absolute',
+        left: '20%',
+        bottom: -12,
+        borderWidth: 6,
+        borderColor: 'transparent',
     },
 });
 

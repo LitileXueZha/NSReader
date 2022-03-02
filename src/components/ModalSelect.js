@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import {
     View,
     Modal,
@@ -8,6 +8,8 @@ import {
     useWindowDimensions,
     ScrollView,
     TouchableWithoutFeedback,
+    Animated,
+    Easing,
 } from 'react-native';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 
@@ -41,7 +43,7 @@ function ModalSelect(props) {
     } = props;
     const [activeIdx, setActiveIdx] = useState(currIndex || 0);
     const { theme, typo } = useContext(AppContext);
-    const cssTitle = {
+    const titleStyle = {
         marginLeft: 4,
         padding: typo.padding,
         color: theme.fontColorSecond,
@@ -49,19 +51,38 @@ function ModalSelect(props) {
     };
 
     const onRequestClose = () => {
-        onClose(activeIdx);
+        onHide(activeIdx);
     };
     const { height } = useWindowDimensions();
     const maxHeightBody = height * GOLD_RATIO - 48;
+    const opacity = useRef(new Animated.Value(0)).current;
+    const onShow = () => {
+        Animated.timing(opacity, {
+            toValue: 1,
+            duration: 200,
+            easing: Easing.ease,
+            useNativeDriver: true,
+        }).start();
+    };
+    const onHide = (index) => {
+        Animated.timing(opacity, {
+            toValue: 0,
+            duration: 250,
+            easing: Easing.ease,
+            useNativeDriver: true,
+        }).start(() => {
+            onClose(index);
+        });
+    };
 
     return (
         <Modal
             visible={visible}
-            animationType="fade"
             transparent
             statusBarTranslucent
             hardwareAccelerated
             onRequestClose={onRequestClose}
+            onShow={onShow}
         >
             {/**
              * Why use a separate overlay?
@@ -70,53 +91,48 @@ function ModalSelect(props) {
              * maybe RN need to handle touch events, so sometimes the
              * scroll behaviour is not responsed.
              * 
-             * This is a hack...
+             * This is a hack... (Seems only appear in Hermes)
              */}
-            <Pressable style={css.overlay} onPress={onRequestClose} />
-            <View style={css.container}>
-                <View style={[css.body, { backgroundColor: theme.bgModalBody }]}>
-                    {title && (
-                        <Text style={cssTitle}>{title}</Text>
-                    )}
-                    <ScrollView style={{ maxHeight: maxHeightBody }} disableScrollViewPanResponder>
-                        {datalist.map((item, index) => (
-                            <Option
-                                key={item.text}
-                                data={item}
-                                active={index === activeIdx}
-                                onPress={() => {
-                                    setActiveIdx(index);
-                                    onClose(index);
-                                }}
-                            />
-                        ))}
-                    </ScrollView>
-                </View>
-            </View>
+            {/* <Pressable style={css.overlay} onPress={onRequestClose} /> */}
+            <TouchableWithoutFeedback onPress={onRequestClose}>
+                <Animated.View style={[css.overlay, { opacity }]}>
+                    <View style={[css.body, { backgroundColor: theme.bgModalBody }]}>
+                        {title && (
+                            <Text style={titleStyle}>{title}</Text>
+                        )}
+                        <ScrollView style={{ maxHeight: maxHeightBody }} disableScrollViewPanResponder>
+                            {datalist.map((item, index) => (
+                                <Option
+                                    key={item.text}
+                                    data={item}
+                                    active={index === activeIdx}
+                                    onPress={() => {
+                                        setActiveIdx(index);
+                                        onHide(index);
+                                    }}
+                                />
+                            ))}
+                        </ScrollView>
+                    </View>
+                </Animated.View>
+            </TouchableWithoutFeedback>
         </Modal>
     );
 }
 
 const css = StyleSheet.create({
-    container: {
+    overlay: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 32,
-    },
-    overlay: {
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: -1,
         backgroundColor: 'rgba(0,0,0,0.45)',
     },
     body: {
+        top: -10,
         width: '100%',
         maxWidth: 360,
-        borderRadius: 2,
+        borderRadius: 4,
         elevation: 12,
     },
 });

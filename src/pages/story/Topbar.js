@@ -27,7 +27,7 @@ const STATUS_TEXT = [TEXT_LOADING, TEXT_UPDATING];
 const SIZE = 24; // icon size, checkbox height...
 
 function Topbar(props) {
-    const { status, data, onFilter } = props;
+    const { status, data, onFilter, onChannelChange } = props;
     const { theme, typo } = useContext(AppContext);
     const cssTopbar = {
         left: typo.margin,
@@ -59,8 +59,11 @@ function Topbar(props) {
     const openChannelPicker = () => {
         setPickVisible(true);
     };
+    const [selectedChannel, setSelectedChannel] = useState(data?.channels[0] || {});
     const onPickClose = (idx) => {
         setPickVisible(false);
+        setSelectedChannel(data.channels[idx]);
+        onChannelChange?.(data.channels[idx], idx);
     };
     const [filter, setFilter] = useFilter(data?.filter);
     const onFilterPress = (type) => {
@@ -88,10 +91,9 @@ function Topbar(props) {
                                 <Icon name="list" size={SIZE} color={theme.fontColor} style={{ marginHorizontal: typo.padding }} />
                                 <View style={css.channelTitle}>
                                     <Text numberOfLines={1} ellipsizeMode="middle" style={{ flexShrink: 1 }}>
-                                        全部
-                                        {/* Lorem ipsum dolor sit amet consectetur adipisicing elit */}
+                                        {selectedChannel.text}
                                     </Text>
-                                    <Badge text="546" />
+                                    <Badge text={selectedChannel.badge} />
                                 </View>
                             </View>
                         </Touchable>
@@ -103,7 +105,7 @@ function Topbar(props) {
                     </>
                 )}
             </View>
-            <ModalSelect title="选择RSS源" visible={pickVisible} onClose={onPickClose} />
+            <ModalSelect title="选择RSS源" datalist={data?.channels} visible={pickVisible} onClose={onPickClose} />
 
             {loaded && filterOpen && (
                 <View style={[css.filterBody, { borderColor: theme.borderColor }]}>

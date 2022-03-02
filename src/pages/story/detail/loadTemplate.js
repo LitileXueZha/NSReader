@@ -8,15 +8,28 @@ import tpl from './index.html';
  * 
  * @see https://github.com/facebook/react-native/issues/7924
  */
-const { uri } = resolveAssetSource(tpl);
 
+const HTML = __HTML_STORY_TEMPLATE__;
 async function loadTemplate() {
     // fs.readFile|readFileAssets|readFileRes not work
-    return __HTML_STORY_TEMPLATE__;
+    return HTML;
 }
 
 if (__DEV__) {
-    loadTemplate = () => fetch(uri).then(res => res.text());
+    const { uri } = resolveAssetSource(tpl);
+    // eslint-disable-next-line no-func-assign
+    loadTemplate = async () => {
+        try {
+            const sc = new AbortController();
+            const timer = setTimeout(() => sc.abort(), 3500);
+            const res = await fetch(uri, { signal: sc });
+            const text = await res.text();
+            clearTimeout(timer);
+            return text;
+        } catch (e) {
+            return HTML;
+        }
+    };
 }
 
 export default loadTemplate;

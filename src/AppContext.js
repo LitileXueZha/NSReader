@@ -70,7 +70,7 @@ function DevReloadButton() {
         const styles = {
             position: 'absolute',
             right: 20,
-            bottom: 80,
+            bottom: 200,
             padding: 10,
             backgroundColor: defaultValue.theme.primaryColor,
             borderRadius: 50,

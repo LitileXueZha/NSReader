@@ -23,6 +23,8 @@ export default function themeStyles(context) {
             ${stylesToCSS(typo.h2)}
             font-weight: bold;
         }
+        ul,ol { margin-left: -${typo.padding}px }
+        li { margin-bottom: 4px }
     `;
 }
 

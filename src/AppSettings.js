@@ -26,9 +26,10 @@ class AppSettings {
      * Init settings
      * 
      * It should be called when app launched at once.
+     * @param {boolean} force
      */
-    async init() {
-        if (this._initialized) return;
+    async init(force = false) {
+        if (!force && this._initialized) return;
 
         try {
             const rawJson = await fs.readFile(FILE);

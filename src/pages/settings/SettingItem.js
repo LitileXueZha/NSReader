@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Checkbox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/SimpleLineIcons';
 
@@ -22,6 +22,8 @@ export default function SettingItem(props) {
         value,
         onPress,
         disableTouchEffect,
+        loading = false,
+        borderless,
     } = props;
     const [checked, setChecked] = useState(value);
     const { theme, typo } = useContext(AppContext);
@@ -31,39 +33,46 @@ export default function SettingItem(props) {
         lineHeight: typo.fontSize,
         marginTop: 4,
     };
+    const borderStyle = borderless || {
+        borderColor: theme.borderColor,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+    };
     const onItemPress = () => {
         if (type === 'checkbox') {
             setChecked(!checked);
         }
-        onPress && onPress();
+        onPress?.(!checked);
     };
 
     return (
         <Touchable onPress={onItemPress} disabled={disableTouchEffect}>
-            <View style={[css.row, { paddingVertical: typo.padding }, style]}>
-                <View style={[css.body, { paddingHorizontal: typo.padding + 4 }]}>
-                    <Text>{text}</Text>
-                    {tips && (
-                        <Text style={tipsStyle}>
-                            {tips}
-                        </Text>
-                    )}
-                </View>
-                <View style={[css.action, { marginHorizontal: typo.margin + 4 }]} pointerEvents="none">
-                    {value && (
-                        <Text style={{ color: theme.fontColorSecond, marginRight: 2 }}>{value}</Text>
-                    )}
-                    {type === 'checkbox' && (
-                        <Checkbox
-                            value={checked}
-                            onValueChange={onItemPress}
-                            tintColors={{ true: theme.primaryColor, false: theme.fontColorSecond }}
-                        />
-                    )}
-                    {(type === 'link' || (type === 'select' && !icon)) && (
-                        <Icon name="arrow-right" size={typo.fontSizeSmall} color={theme.fontColorSecond} />
-                    )}
-                    {icon}
+            <View style={{ paddingLeft: typo.margin + 4 }}>
+                <View style={[css.row, { paddingVertical: typo.padding }, style, borderStyle]}>
+                    <View style={css.body}>
+                        <Text>{text}</Text>
+                        {tips && (
+                            <Text style={tipsStyle}>
+                                {tips}
+                            </Text>
+                        )}
+                    </View>
+                    <View style={[css.action, { marginHorizontal: typo.margin + 4 }]} pointerEvents="none">
+                        {loading && <ActivityIndicator style={css.icLoad} />}
+                        {value && (
+                            <Text style={{ color: theme.fontColorSecond, marginRight: 2 }}>{value}</Text>
+                        )}
+                        {type === 'checkbox' && (
+                            <Checkbox
+                                value={checked}
+                                onValueChange={onItemPress}
+                                tintColors={{ true: theme.primaryColor, false: theme.fontColorSecond }}
+                            />
+                        )}
+                        {(type === 'link' || (type === 'select' && !icon)) && (
+                            <Icon name="arrow-right" size={typo.fontSizeSmall} color={theme.fontColorSecond} />
+                        )}
+                        {icon}
+                    </View>
                 </View>
             </View>
         </Touchable>
@@ -86,5 +95,8 @@ const css = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-end',
         minWidth: 32,
+    },
+    icLoad: {
+        marginRight: 6,
     },
 });

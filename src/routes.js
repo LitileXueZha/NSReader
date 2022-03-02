@@ -13,6 +13,8 @@ import {
     IDSupportSpecs,
     IDRSSDetail,
     IDStoryDetail,
+    IDCopyrights,
+    IDExperiment,
 } from './pages/IDSymbols.js';
 import Story from './pages/story';
 import RSS from './pages/rss';
@@ -24,18 +26,30 @@ import RSSAdd from './pages/rss/add';
 import SupportSpecs from './pages/rss/support-specs';
 import RSSDetail from './pages/rss/detail';
 import StoryDetail from './pages/story/detail';
+import Copyrights from './pages/about/copyrights';
+import Experiment from './pages/settings/experiment';
+
+const ROUTES = {
+    [IDAbout]: About,
+    [IDStorage]: Storage,
+    [IDSettingsMore]: SettingsMore,
+    [IDRSSAdd]: RSSAdd,
+    [IDSupportSpecs]: SupportSpecs,
+    [IDRSSDetail]: RSSDetail,
+    [IDStoryDetail]: StoryDetail,
+    [IDCopyrights]: Copyrights,
+    [IDExperiment]: Experiment,
+};
 
 export default function registerRoutes() {
     register(TABStory, Story);
     register(TABRSS, RSS);
     register(TABSettings, Settings);
-    register(IDAbout, About);
-    register(IDStorage, Storage);
-    register(IDSettingsMore, SettingsMore);
-    register(IDRSSAdd, RSSAdd);
-    register(IDSupportSpecs, SupportSpecs);
-    register(IDRSSDetail, RSSDetail);
-    register(IDStoryDetail, StoryDetail);
+    Navigation.setLazyComponentRegistrator((id) => {
+        if (id in ROUTES) {
+            register(id, ROUTES[id]);
+        }
+    });
 }
 
 /** Simply register (reduce code) */

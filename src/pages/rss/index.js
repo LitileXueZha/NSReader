@@ -2,17 +2,14 @@ import React, { Component } from 'react';
 import {
     Alert,
     FlatList,
-    LayoutAnimation,
     Pressable,
-    RefreshControl,
-    ScrollView,
     StyleSheet,
     View,
 } from 'react-native';
-import { Navigation } from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { AppContext } from '../../AppContext.js';
+import { pages } from '../../themes';
 import Text from '../../components/SText.js';
 import SourceItem from './SourceItem.js';
 import { getRandomSources } from '../../utils/randomize.js';
@@ -22,6 +19,8 @@ import { IDRSSAdd, IDRSSDetail } from '../IDSymbols.js';
 import Touchable from '../../components/Touchable.js';
 import MRSS from '../../models/RSS.js';
 import format from '../../utils/format.js';
+import { goto } from '../../components/Link.js';
+import C from '../../components/globalCSSStyles.js';
 
 const TDATA = [
     { title: '奇客Solidot–传递最新科技情报', date: new Date(), description: '奇客的知识，重要的东西。', rcIdx: 2, enabled: true },
@@ -57,22 +56,13 @@ class RSS extends Component {
     }
 
     onSourceAdd = () => {
-        Navigation.push('root', {
-            component: { name: IDRSSAdd },
-        });
+        goto(IDRSSAdd);
     };
 
     onSourcePress = (index) => {
         const { sources } = this.state;
         const { id } = sources[index];
-        Navigation.push('root', {
-            component: {
-                name: IDRSSDetail,
-                passProps: {
-                    route: { id },
-                },
-            },
-        });
+        goto(IDRSSDetail, { id });
     }
 
     onToggleEnabled = (enabled, item) => {
@@ -94,7 +84,14 @@ class RSS extends Component {
 
     render() {
         const { theme, typo } = this.context;
-        const helpStyles = {
+        const themePage = pages[theme.id].rss;
+        const totalStyle = {
+            backgroundColor: themePage.bgTotal,
+            paddingHorizontal: typo.padding,
+            paddingVertical: 4,
+            borderRadius: 50,
+        };
+        const helpStyle = {
             padding: typo.padding,
             margin: typo.margin,
             backgroundColor: theme.bgRSSHelp,
@@ -102,46 +99,50 @@ class RSS extends Component {
         const { refreshing, sources } = this.state;
 
         return (
-            <View style={css.flex1}>
+            <>
                 <FlatList
-                    style={css.flex1}
+                    style={C.f1}
                     data={sources}
                     renderItem={this.renderItem}
                     refreshing={refreshing}
                     onRefresh={this.onRefresh}
-                    contentContainerStyle={{ minHeight: '100%' }}
+                    contentContainerStyle={css.minH100}
                     ListEmptyComponent={<Empty />}
                     ListHeaderComponent={(
                         <View style={{ paddingHorizontal: typo.padding, marginBottom: typo.margin }}>
                             <View style={{ marginVertical: typo.margin }}>
-                                <Text style={[css.update, { color: theme.fontColorSecond }]}>最后更新于</Text>
-                                <Text style={[css.update, { color: theme.fontColorSecond }]}>
+                                <Text style={css.update} secondary>最后更新于</Text>
+                                <Text style={css.update} secondary>
                                     {format.date(new Date(), true)}
                                 </Text>
                             </View>
                             <View style={css.info}>
-                                <Text secondary>{`共 ${sources.length} 项`}</Text>
+                                <View style={totalStyle}>
+                                    <Text style={{ fontSize: typo.fontSizeSmall }}>
+                                        {`共 ${sources.length} 项`}
+                                    </Text>
+                                </View>
                                 <Button type="primary" onPress={this.onSourceAdd}>添加 RSS 源</Button>
                             </View>
                         </View>
                     )}
                     ListFooterComponent={(
                         <>
-                            <View style={[css.helpLink, helpStyles]}>
+                            <View style={[css.helpLink, helpStyle]}>
                                 <Icon name="help-circle-outline" color={theme.linkColor} size={typo.mSize} />
-                                <Text style={{ color: theme.linkColor, marginLeft: 4 }}>了解如何添加RSS源</Text>
+                                <Text style={[C.margin.l4, { color: theme.linkColor }]}>了解如何添加RSS源</Text>
                             </View>
                             <Touchable onPress={this.onTutorialPress}>
-                                <View style={[css.helpLink, helpStyles, { marginTop: 0 }]}>
+                                <View style={[css.helpLink, helpStyle, { marginTop: 0 }]}>
                                     <Icon name="happy-outline" color={theme.fontColor} size={typo.mSize} />
-                                    <Text style={{ marginLeft: 4 }}>开始使用</Text>
+                                    <Text style={C.margin.l4}>开始使用</Text>
                                 </View>
                             </Touchable>
                         </>
                     )}
-                    ListFooterComponentStyle={[sources.length > 0 && css.flex1, { justifyContent: 'flex-end' }]}
+                    ListFooterComponentStyle={[sources.length > 0 && C.f1, { justifyContent: 'flex-end' }]}
                 />
-            </View>
+            </>
         );
     }
 }
@@ -163,7 +164,7 @@ const css = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 6,
     },
-    flex1: { flex: 1 },
+    minH100: { minHeight: '100%' },
 });
 
 export default RSS;

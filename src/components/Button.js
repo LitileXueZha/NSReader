@@ -8,7 +8,7 @@ import { AppContext } from '../AppContext.js';
 import Touchable from './Touchable.js';
 import { buttons } from '../themes';
 
-const RADIUS = 2;
+const RADIUS = 4;
 const HEIGHT = 32;
 
 function Button(props) {

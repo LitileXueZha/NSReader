@@ -52,6 +52,7 @@ export const themes = {
             light.done.emphasis,
             light.sponsors.emphasis,
         ],
+        fgOnPaper: light.fg.onEmphasis,
         imgIcons: {
             empty: iconEmpty,
         },
@@ -89,6 +90,7 @@ export const themes = {
             dark.done.emphasis,
             dark.sponsors.emphasis,
         ],
+        fgOnPaper: dark.fg.onEmphasis,
         imgIcons: {
             empty: iconEmptyDark,
         },
@@ -119,6 +121,23 @@ export const buttons = {
             color: '#fff',
             bg: ['#FFA733', '#D39940'],
             borderColor: 'transparent',
+        },
+    },
+};
+/**
+ * Page specify themes
+ */
+export const pages = {
+    main: {
+        story: {},
+        rss: {
+            bgTotal: light.success.subtle,
+        },
+    },
+    dark: {
+        story: {},
+        rss: {
+            bgTotal: dark.success.subtle,
         },
     },
 };

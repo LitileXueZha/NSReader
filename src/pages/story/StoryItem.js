@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 
 import Text from '../../components/SText.js';
@@ -15,20 +15,35 @@ function StoryItem(props) {
         onPress,
         hideSummary,
         flagIndex,
+        flagPast,
     } = props;
     const [read, setRead] = useState(data.read);
     const { theme, typo } = useContext(AppContext);
-    const rowStyles = {
-        paddingVertical: typo.padding,
-        paddingRight: typo.padding + 4,
-        borderColor: theme.borderColor,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-    };
-    const readStyles = read && {
-        color: theme.fontColorSecond,
-    };
-    const flagStyles = {
-        backgroundColor: theme.bgStoryFlag,
+    const memoStyles = useMemo(() => ({
+        wrapper: {
+            paddingLeft: typo.padding + 4,
+        },
+        row: {
+            paddingVertical: typo.padding,
+            paddingRight: typo.padding + 4,
+            borderColor: theme.borderColor,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+        },
+        flag: [css.flag, {
+            backgroundColor: theme.bgStoryFlag,
+            color: theme.fontColorSecond,
+        }],
+        title: {
+            fontSize: typo.h2.fontSize,
+            fontWeight: 'bold',
+        },
+        desc: {
+            marginTop: 4,
+            fontSize: typo.fontSizeSmall,
+            lineHeight: typo.fontSize,
+        },
+    }), [theme, typo]);
+    const readStyle = read && {
         color: theme.fontColorSecond,
     };
     const onItemPress = () => {
@@ -41,22 +56,22 @@ function StoryItem(props) {
 
     return (
         <TouchHighlight onPress={onItemPress}>
-            <View style={{ paddingLeft: typo.padding + 4 }} collapsable>
-                <View style={rowStyles}>
+            <View style={memoStyles.wrapper} collapsable>
+                <View style={memoStyles.row}>
                     <View style={css.flagRow}>
                         {flagIndex && (
-                            <Text style={[css.flag, flagStyles]}>{`#${flagIndex}`}</Text>
+                            <Text style={memoStyles.flag}>{`#${flagIndex}`}</Text>
                         )}
-                        {data.flagPast && (
-                            <Text style={[css.flag, flagStyles]}>更早以前</Text>
+                        {flagPast && (
+                            <Text style={memoStyles.flag}>更早以前</Text>
                         )}
                     </View>
-                    <Text style={[readStyles, { fontSize: typo.h2.fontSize, fontWeight: 'bold' }]}>
+                    <Text style={[readStyle, memoStyles.title]}>
                         {prettyText(data.title)}
                     </Text>
                     {!hideSummary && (
                         <Text
-                            style={[readStyles, { fontSize: typo.fontSizeSmall, lineHeight: typo.fontSize, marginTop: 4 }]}
+                            style={[readStyle, memoStyles.desc]}
                             numberOfLines={3}
                             ellipsizeMode="tail"
                         >
@@ -64,7 +79,7 @@ function StoryItem(props) {
                         </Text>
                     )}
                     <View style={css.info}>
-                        <Text style={[css.date, { color: theme.fontColorSecond }]}>{format.date(data.date)}</Text>
+                        <Text style={css.date} secondary>{format.date(data.date)}</Text>
                         <Favicon id={data.pid} size={12} radius={12} />
                     </View>
                 </View>
@@ -74,7 +89,7 @@ function StoryItem(props) {
 }
 
 const REG_SPACE = /\s*(\n|\s{2,})/gm;
-export function prettyText(str) {
+export function prettyText(str = '') {
     return str.replace(REG_SPACE, ' ');
 }
 
@@ -100,7 +115,7 @@ const css = StyleSheet.create({
         paddingVertical: 2,
         fontSize: 12,
         lineHeight: 14,
-        borderRadius: 2,
+        borderRadius: 4,
     },
 });
 
@@ -114,7 +129,11 @@ const css = StyleSheet.create({
  * manually when updated.
  */
 function areEqual(prevProps, nextProps) {
-    if (nextProps.hideSummary !== prevProps.hideSummary || nextProps.flagIndex !== prevProps.flagIndex) {
+    if (
+        nextProps.hideSummary !== prevProps.hideSummary
+        || nextProps.flagIndex !== prevProps.flagIndex
+        || nextProps.flagPast !== prevProps.flagPast
+    ) {
         return false;
     }
     return true;

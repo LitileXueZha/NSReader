@@ -10,3 +10,5 @@ export const IDRSSAdd = Symbol('pages/rss/add');
 export const IDSupportSpecs = Symbol('pages/rss/support-specs');
 export const IDRSSDetail = Symbol('pages/rss/detail');
 export const IDStoryDetail = Symbol('pages/story/detail');
+export const IDCopyrights = Symbol('pages/about/copyrights');
+export const IDExperiment = Symbol('pages/about/experiment');

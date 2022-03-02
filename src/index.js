@@ -38,8 +38,8 @@ export default function launchApp() {
         LogBox.ignoreLogs(['NativeEventEmitter']);
         // require('@welldone-software/why-did-you-render')(React, {
         //     trackAllPureComponents: true,
-        //     trackHooks: false, // Some issues when fast refresh, disabled
-        //     // exclude: [/FlatList/],
+        //     // trackHooks: false, // Some issues when fast refresh, disabled
+        //     exclude: [/FlatList/],
         // });
     }
 }

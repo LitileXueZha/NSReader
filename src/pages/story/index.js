@@ -1,23 +1,15 @@
 import React, { Component } from 'react';
 import {
     View,
-    ScrollView,
     StyleSheet,
-    TouchableHighlight,
-    Alert,
-    RefreshControl,
-    Button,
     FlatList,
     InteractionManager,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { Navigation } from 'react-native-navigation';
 
 import { AppContext } from '../../AppContext.js';
 import { BASE_SPACE } from '../../themes/typography.js';
 import Text from '../../components/SText.js';
 import Notification from '../../utils/notification.js';
-import Touchable from '../../components/Touchable.js';
 import Topbar, {
     STATUS_LOADING,
     STATUS_UPDATING,
@@ -29,13 +21,16 @@ import { getRandomStories } from '../../utils/randomize.js';
 import StoryItem from './StoryItem.js';
 import { doFilter } from './useFilter.js';
 import Empty from '../../components/Empty.js';
-import Link from '../../components/Link.js';
+import Link, { goto } from '../../components/Link.js';
 import MRSS from '../../models/RSS.js';
 import MStory from '../../models/Story.js';
 import Perf from '../../utils/Perf.js';
 import { IDStoryDetail } from '../IDSymbols.js';
 import ScrollToTop, { setScrollTop } from '../../components/ScrollToTop.js';
+import { createPanResponder, AttachFeatures } from './easymode.js';
 
+
+const ID_ALL = Symbol('all');
 
 class Story extends Component {
     constructor() {
@@ -56,26 +51,42 @@ class Story extends Component {
         };
         this.scrollRef = React.createRef();
         this.onScroll = setScrollTop.bind(this);
-        this.state.stories = doFilter(this.stories, this.state.extraData);
+        this.channels = [
+            { id: ID_ALL, text: '全部', badge: 0 },
+        ];
+        this.channelId = ID_ALL;
+        this.lockScrollEnd = false;
+        this.featRef = React.createRef();
+        this.panResponder = {};
+        this.pastId = undefined;
     }
 
     componentDidMount() {
         this.setup();
+        this.panResponder = createPanResponder(this.featRef.current);
     }
 
     setup = async () => {
-        if (MStory.initialized) return;
-
         try {
             await MRSS.init();
             await MStory.init();
             this.stories = MStory.data;
+            this.setupChannels();
 
-            const { extraData } = this.state;
-            const stories = doFilter(this.stories, extraData);
+            const stories = this.reFilter();
             this.setState({ stories, status: STATUS_DONE });
         } catch (e) {
             Perf.error(e);
+        }
+    }
+
+    setupChannels = () => {
+        const list = MRSS.countList;
+        this.channels = [].concat(this.channels);
+        for (const item of list) {
+            const { id, title, total } = item;
+            this.channels[0].badge += item.total;
+            this.channels.push({ id, text: title, badge: total });
         }
     }
 
@@ -113,9 +124,10 @@ class Story extends Component {
                 [type]: value,
             };
 
+            this.state.extraData = newExtraData;
             this.setState({
                 extraData: newExtraData,
-                stories: doFilter(this.stories, newExtraData),
+                stories: this.reFilter(),
             });
         });
 
@@ -138,25 +150,60 @@ class Story extends Component {
         }
     }
 
-    onEndReached = async (info) => {
-        if (!MStory.more) return;
-
-        const { id } = this.stories[this.stories.length - 1];
-        await MStory.load(id);
-        this.stories = MStory.data;
+    reFilter = () => {
         const { extraData } = this.state;
-        const stories = doFilter(this.stories, extraData);
+        const showAll = this.channelId === ID_ALL;
+        const channelStories = showAll
+            ? this.stories
+            : this.stories.filter((v) => v.pid === this.channelId);
+        const stories = doFilter(channelStories, extraData);
+        this.pastId = stories.flagPastId;
+
+        return stories;
+    }
+
+    onChannelChange = async (channel) => {
+        const { id, badge } = channel;
+        if (id === this.channelId) return;
+
+        this.channelId = id;
+        const stories = this.reFilter();
+
+        if (stories.length === 0 && badge > 0) {
+            // Load more
+            return this.onEndReached();
+        }
+
         this.setState({ stories });
     }
 
+    onEndReached = async (info) => {
+        if (!MStory.more || this.lockScrollEnd) return;
+
+        const { id } = this.stories[this.stories.length - 1];
+        // Add a lock for unexpected onEndReached event fired by setState() or bounce
+        this.lockScrollEnd = true;
+        try {
+            await MStory.load(id);
+            this.stories = MStory.data;
+
+            const stories = this.reFilter();
+            // Progressive display
+            this.setState({ stories });
+            this.lockScrollEnd = false;
+            // Not enough items in one screen, load more
+            if (stories.length < 10) {
+                return this.onEndReached();
+            }
+        } catch (e) {
+            this.lockScrollEnd = false;
+            Perf.error(e);
+        }
+    }
+
     onStoryPress = (item) => {
-        const index = this.stories.findIndex((v) => v.id === item.id);
-        Navigation.push('root', {
-            component: {
-                name: IDStoryDetail,
-                passProps: { route: { index } },
-            },
-        });
+        const { id } = item;
+        goto(IDStoryDetail, { id });
     }
 
     onScrollTop = () => {
@@ -166,10 +213,11 @@ class Story extends Component {
     renderItem = ({ item, index }) => {
         const { extraData } = this.state;
         let flagIndex = index > 0 && index % 20 === 0 && index;
-        if (index === 0 && item.flagPast) {
-            // flagPast is added in `doFilter`
-            delete item.flagPast;
-        } else if ((index > 0 && index % 20 === 0) || item.flagPast) {
+        // pastId is added in `doFilter`
+        let flagPast = item.id === this.pastId;
+        if (index === 0 && flagPast) {
+            flagPast = false;
+        } else if ((index > 0 && index % 20 === 0) || flagPast) {
             flagIndex = index;
         }
         return (
@@ -177,6 +225,7 @@ class Story extends Component {
                 key={item.id}
                 data={item}
                 flagIndex={flagIndex}
+                flagPast={flagPast}
                 hideSummary={!extraData.summary}
                 onPress={this.onStoryPress}
             />
@@ -188,7 +237,7 @@ class Story extends Component {
         const { status, refreshing, stories, extraData, scrollTop } = this.state;
 
         return (
-            <View style={css.container}>
+            <>
                 <FlatList
                     ref={this.scrollRef}
                     onScroll={this.onScroll}
@@ -201,9 +250,9 @@ class Story extends Component {
                     onEndReached={this.onEndReached}
                     contentContainerStyle={[css.list, stories.length === 0 && { flex: 1 }]}
                     ListFooterComponent={stories.length > 0 && (
-                        <View style={{ padding: typo.padding + 4, marginTop: typo.margin * 2 }}>
+                        <View style={{ marginVertical: typo.margin * 2 }}>
                             <Text style={{ fontSize: typo.fontSizeSmall, textAlign: 'center' }} secondary>
-                                {MStory.more ? '正在读取更多\n...' : '结尾了'}
+                                {MStory.more ? `上拉读取更多\n${this.stories.length}/${this.channels[0].badge}` : '结尾了'}
                             </Text>
                         </View>
                     )}
@@ -218,29 +267,32 @@ class Story extends Component {
                             )}
                         />
                     )}
+                    {...this.panResponder}
                     /* Performance */
                     // debug
                     windowSize={9}
                     updateCellsBatchingPeriod={50}
-                    disableScrollViewPanResponder
                     // Android only
                     endFillColor={theme.background}
                     fadingEdgeLength={10}
                     nestedScrollEnabled={false}
                     overScrollMode="always"
                 />
-                <Topbar status={status} data={{ filter: extraData }} onFilter={this.onFilter} />
+                <Topbar
+                    status={status}
+                    data={{ filter: extraData, channels: this.channels }}
+                    onFilter={this.onFilter}
+                    onChannelChange={this.onChannelChange}
+                />
                 <ScrollToTop visible={scrollTop} onPress={this.onScrollTop} />
-            </View>
+                <AttachFeatures ref={this.featRef} />
+            </>
         );
     }
 }
 Story.contextType = AppContext;
 
 const css = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
     topbar: {
         flexDirection: 'row',
         alignItems: 'center',

@@ -29,7 +29,7 @@ if (__DEV__) {
         let tsLog = `+${tsDiff.toFixed(2)}ms`;
 
         if (tsDiff > 10000) {
-            tsLog = `+${(tsDiff / 10000).toFixed(3)}s`;
+            tsLog = `+${(tsDiff / 1000).toFixed(3)}s`;
         }
         if (isRN) {
             // Command line

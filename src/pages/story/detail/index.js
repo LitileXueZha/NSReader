@@ -5,8 +5,12 @@ import {
     StyleSheet,
     View,
     InteractionManager,
+    Alert,
+    Share,
 } from 'react-native';
 import WebView from 'react-native-webview';
+import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
+import IonIcon from 'react-native-vector-icons/Ionicons';
 
 import { AppContext } from '../../../AppContext.js';
 import C from '../../../components/globalCSSStyles.js';
@@ -20,13 +24,14 @@ import Favicon from '../../../components/Favicon.js';
 import format from '../../../utils/format.js';
 import { prettyText } from '../StoryItem.js';
 import ScrollToTop, { setScrollTop } from '../../../components/ScrollToTop.js';
-import { openLink } from '../../../components/Link.js';
+import { goBack, openLink } from '../../../components/Link.js';
 import themeStyles from './themeStyles.js';
 import { GOLD_RATIO } from '../../../themes/typography.js';
 
 const KEY = '__HTML_STORY__';
 const KEY_CSS = '/*!__CSS_THEME__*/';
 const WHITELIST = ['*'];
+const REG_NAME_EMAIL = /\s<.+>/; // name <email@e.com>
 
 class StoryDetail extends Component {
     constructor(props) {
@@ -37,7 +42,7 @@ class StoryDetail extends Component {
             scrollTop: false,
         };
         this.onScroll = setScrollTop.bind(this);
-        this.data = MStory.data[props.route?.index];
+        this.data = MStory.data.find((v) => v.id === props.route.id);
         this.rss = MRSS.data[this.data?.pid];
         this.MENUS = [{
             id: 'share',
@@ -53,6 +58,13 @@ class StoryDetail extends Component {
     }
 
     componentDidMount() {
+        if (!this.data) {
+            Alert.alert(null, '未知数据', [{
+                text: '返回',
+                onPress: goBack,
+            }]);
+            return;
+        }
         InteractionManager.runAfterInteractions(this.setup);
         // this.setup();
     }
@@ -72,8 +84,8 @@ class StoryDetail extends Component {
         Perf.info('WebView loadEnd');
     }
 
-    onMessage = (e) => {
-        const { data } = e.nativeEvent;
+    onMessage = (ev) => {
+        const { data } = ev.nativeEvent;
         try {
             const { height } = JSON.parse(data);
             this.setState({ height });
@@ -92,13 +104,43 @@ class StoryDetail extends Component {
         this.scrollRef.current.scrollTo({ y: 0 });
     }
 
+    onMenuPress = (index) => {
+        const { title, link } = this.data;
+        switch (this.MENUS[index].id) {
+            case 'share':
+                Share.share({
+                    message: `${title} - NSReader`,
+                    title: this.rss.title,
+                    url: link,
+                });
+                break;
+            case 'open':
+                link && openLink(link);
+                break;
+            case 'feedback':
+                openLink('https://github.com/LitileXueZha/NSReader/issues');
+                break;
+            default:
+                break;
+        }
+    }
+
     render() {
         const { theme, typo } = this.context;
         const { html, height, scrollTop } = this.state;
 
+        if (!this.data) {
+            return null;
+        }
+        const { title, date, author } = this.data;
+        const titleStyle = [typo.h1, {
+            marginTop: typo.margin,
+            marginBottom: 4,
+            lineHeight: typo.h1.fontSize * 1.15,
+        }];
         return (
             <>
-                <Navbar title="详情" menus={this.MENUS} />
+                <Navbar title="详情" menus={this.MENUS} onMenuPress={this.onMenuPress} />
                 <ScrollView
                     style={C.f1}
                     ref={this.scrollRef}
@@ -112,13 +154,13 @@ class StoryDetail extends Component {
                                 {this.rss.title}
                             </Text>
                         </View>
-                        <Text style={[typo.h1, css.title, { lineHeight: typo.h1.fontSize * 1.15, marginTop: typo.margin }]}>
-                            {prettyText(this.data.title)}
-                        </Text>
+                        <Text style={titleStyle}>{prettyText(title)}</Text>
                         <View style={C.flex.row}>
-                            <Text style={C.fs12} secondary>{format.date(this.data.date)}</Text>
-                            {this.data.author && (
-                                <Text style={[C.fs12, C.margin.l4]}>{this.data.author}</Text>
+                            <Text style={C.fs12} secondary>{format.date(date)}</Text>
+                            {author && (
+                                <Text style={css.author} numberOfLines={1}>
+                                    {author.replace(REG_NAME_EMAIL, '')}
+                                </Text>
                             )}
                         </View>
                     </View>
@@ -139,6 +181,12 @@ class StoryDetail extends Component {
                             showsHorizontalScrollIndicator={false}
                         />
                     )}
+                    {height === 0 && (
+                        <View style={css.loading}>
+                            <SimpleLineIcon name="direction" size={32} color={theme.fontColorSecond} />
+                            <Text style={{ fontSize: typo.fontSizeSmall }} secondary>正在加载</Text>
+                        </View>
+                    )}
                 </ScrollView>
                 <ScrollToTop visible={scrollTop} onPress={this.onScrollTop} />
             </>
@@ -146,6 +194,26 @@ class StoryDetail extends Component {
     }
 }
 StoryDetail.contextType = AppContext;
+/** @type {import('react-native-navigation').Options} */
+// StoryDetail.options = {
+//     topBar: {
+//         visible: true,
+//         title: { text: '详情' },
+//         rightButtons: [{
+//             id: 'share',
+//             text: '分享',
+//             showAsAction: 'never',
+//         }, {
+//             id: 'open',
+//             text: '在浏览器中打开',
+//             showAsAction: 'never',
+//         }, {
+//             id: 'feedback',
+//             text: '反馈',
+//             showAsAction: 'never',
+//         }],
+//     },
+// };
 
 const css = StyleSheet.create({
     rssRow: {
@@ -156,12 +224,18 @@ const css = StyleSheet.create({
         paddingHorizontal: 6 / GOLD_RATIO,
     },
     rssTitle: {
-        marginLeft: 4,
+        marginLeft: 6,
         flex: 1,
         flexShrink: 1,
     },
-    title: {
-        marginBottom: 4,
+    loading: {
+        alignItems: 'center',
+        marginTop: 56,
+    },
+    author: {
+        flexShrink: 1,
+        marginLeft: 4,
+        fontSize: 12,
     },
 });
 

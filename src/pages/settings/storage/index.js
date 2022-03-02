@@ -111,16 +111,20 @@ class Storage extends Component {
             height: '100%',
             width: `${fsInfo.percent * 100}%`,
         };
+        const sectionStyle = {
+            backgroundColor: theme.background,
+            marginTop: typo.margin,
+        };
 
         return (
             <>
                 <Navbar title="存储" />
                 <ScrollView style={{ flex: 1, backgroundColor: theme.bgPaperInset }}>
-                    <View style={{ backgroundColor: theme.background, marginTop: typo.margin }}>
+                    <View style={sectionStyle}>
                         <View style={[css.overview, { padding: typo.padding + 4, marginBottom: typo.margin }]}>
                             <Text>空间</Text>
                             <View style={{ alignItems: 'flex-end' }}>
-                                <Text style={{ color: theme.fontColorSecond }}>
+                                <Text secondary>
                                     可用 {fsInfo.free} /
                                     总计 {fsInfo.total}
                                 </Text>
@@ -146,9 +150,10 @@ class Storage extends Component {
                             tips="保存的 RSS 源列表，应用设置"
                             value={format.bytes(setting)}
                             disableTouchEffect
+                            borderless
                         />
                     </View>
-                    <View style={{ backgroundColor: theme.background, marginTop: typo.margin }}>
+                    <View style={sectionStyle}>
                         <SettingItem
                             text="清空缓存"
                             onPress={this.onCacheDrop}
@@ -158,6 +163,7 @@ class Storage extends Component {
                             tips="删除数据文件将导致阅读列表为空，且无法再查看更早以前的 RSS 源内容"
                             icon={<Icon name="warning" size={typo.mSize} color={theme.dangerColor} />}
                             onPress={this.onDataClear}
+                            borderless
                         />
 
                     </View>

@@ -38,26 +38,9 @@ export default function Link(props) {
         textDecorationLine: underline ? 'underline' : 'none',
     };
     const onPress = () => {
-        // Switch tab
-        if (to && tabIDs.indexOf(to) > -1) {
-            Navigation.mergeOptions('id_bottomTabs', {
-                bottomTabs: { currentTabId: to },
-            });
-            return;
-        }
-        if (to) {
-            // Navigate to app's route
-            if (typeof to === 'symbol') {
-                Navigation.push('root', {
-                    component: {
-                        name: to,
-                        passProps: {
-                            route: data,
-                        },
-                    },
-                }).catch(Perf.error);
-                return;
-            }
+        if (!to) return;
+        const inApp = goto(to, data);
+        if (!inApp) {
             // Open web url
             if (to.startsWith('http')) {
                 openLink(to).catch(Perf.error);
@@ -91,4 +74,50 @@ export function openLink(url) {
         });
     }
     return Linking.openURL(url);
+}
+
+/**
+ * Navigate to a app page
+ * 
+ * @param {symbol|string} to app's route id
+ * @param {object} data passed data at `props.route`
+ * @returns {boolean} is in-app page
+ */
+export function goto(to, data = {}) {
+    // Switch tab
+    if (tabIDs.indexOf(to) > -1) {
+        // On easy mode, tabs are hidden. Navigate to pure page
+        if (aps.get('settings.easymode')) {
+            pushToRoot();
+            return true;
+        }
+        Navigation.mergeOptions('id_bottomTabs', {
+            bottomTabs: { currentTabId: to },
+        });
+        return true;
+    }
+    // Navigate to app's route
+    if (typeof to === 'symbol') {
+        pushToRoot();
+        return true;
+    }
+    return false;
+
+    function pushToRoot() {
+        Navigation.push('root', {
+            component: {
+                name: to,
+                passProps: {
+                    route: data,
+                },
+            },
+        }).catch(Perf.error);
+    }
+}
+
+/**
+ * Navigate back to previous page
+ */
+export function goBack() {
+    Navigation.pop('root').catch(Perf.error);
 }

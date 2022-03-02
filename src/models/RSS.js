@@ -113,7 +113,7 @@ class RSSSource {
         const saveId = this._getSaveId(data);
 
         if (saveId) {
-            // Don't use await, make it concurrent
+            // Don't use await, make it asynchronous
             fs.writeFile(`${RSS_DIR}/${id}/${saveId}.xml`, sourceText).catch((e) => {
                 Perf.error(e);
             });
@@ -194,11 +194,24 @@ class RSSSource {
                 const { mtime } = xmlFiles[j];
                 const result = parseRSS(contents[j]);
                 if (result.ok) {
-                    MStory.append(result.data.story, self.data[id]);
+                    MStory.append(result.data.story, self.data[id], mtime);
                 }
             }
-            await readLocalRSS(i + 1);
+            return readLocalRSS(i + 1);
         }
+    }
+
+    get countList() {
+        Perf.log('get RSS#countList');
+        const list = Object.values(this.data);
+        const fnMap = (item) => {
+            const { id, title } = item;
+            const total = MStory._ids[id]?.list.length || 0;
+
+            return { id, title, total };
+        };
+
+        return list.map(fnMap);
     }
 
     async _saveWork(data) {

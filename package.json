@@ -4,6 +4,7 @@
   "private": true,
   "description": "A great RSS reader on mobile",
   "scripts": {
+    "genlc": "node scripts/generateLicenses.js",
     "test": "mocha",
     "report": "c8 --reporter=html --reporter=text mocha"
   },
@@ -13,12 +14,15 @@
     "url": "git+https://github.com/LitileXueZha/NSReader.git"
   },
   "keywords": [
+    "android",
+    "atom",
     "rss",
+    "feeds",
     "reader",
     "react-native"
   ],
   "author": "litilexuezha",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/LitileXueZha/NSReader/issues"
   },
