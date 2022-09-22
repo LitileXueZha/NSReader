@@ -1,13 +1,13 @@
 /**
  * Some utils function for models/Story
- * 
+ *
  * It's designed for unit test.
  */
 export default 'Story.util';
 
 /**
  * Insert data to list (in `.date` order)
- * 
+ *
  * @param {array} stories
  * @param {array} list
  */

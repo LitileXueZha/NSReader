@@ -26,7 +26,7 @@ const TDATA = [{
     text: '问题反馈',
     icon: <Icon name="checkmark" size={20} />,
 }];
-const HEIGHT = 52;
+const HEIGHT = 48;
 
 /**
  * App navigation bar

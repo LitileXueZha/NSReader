@@ -11,6 +11,7 @@ import {
 import WebView from 'react-native-webview';
 import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
+import fs from 'react-native-fs';
 
 import { AppContext } from '../../../AppContext.js';
 import C from '../../../components/globalCSSStyles.js';
@@ -42,7 +43,7 @@ class StoryDetail extends Component {
             scrollTop: false,
         };
         this.onScroll = setScrollTop.bind(this);
-        this.data = MStory.data.find((v) => v.id === props.route.id);
+        this.data = MStory.data.find((v) => v.id === props.route?.id);
         this.rss = MRSS.data[this.data?.pid];
         this.MENUS = [{
             id: 'share',
@@ -151,10 +152,10 @@ class StoryDetail extends Component {
                         <View style={[css.rssRow, { backgroundColor: theme.bgStoryDetailOnRSS }]}>
                             <Favicon id={this.rss.id} size={typo.mSize} radius={typo.mSize} />
                             <Text style={[css.rssTitle, { fontSize: typo.fontSizeSmall }]} numberOfLines={1} secondary>
-                                {this.rss.title}
+                                {this.rss.alias || this.rss.title}
                             </Text>
                         </View>
-                        <Text style={titleStyle}>{prettyText(title)}</Text>
+                        <Text style={titleStyle} selectable>{prettyText(title)}</Text>
                         <View style={C.flex.row}>
                             <Text style={C.fs12} secondary>{format.date(date)}</Text>
                             {author && (
@@ -183,6 +184,7 @@ class StoryDetail extends Component {
                     )}
                     {height === 0 && (
                         <View style={css.loading}>
+                            {/* <ActivityIndicator color={theme.primaryColor} size="large" /> */}
                             <SimpleLineIcon name="direction" size={32} color={theme.fontColorSecond} />
                             <Text style={{ fontSize: typo.fontSizeSmall }} secondary>正在加载</Text>
                         </View>

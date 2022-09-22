@@ -6,7 +6,9 @@ import { AppContext } from '../AppContext.js';
 import Text from './SText.js';
 
 export default function Empty(props) {
-    const { style, more, description, icon } = props;
+    const {
+        style, more, description, icon,
+    } = props;
     const { theme, typo } = useContext(AppContext);
     return (
         <View style={[css.body, style]}>

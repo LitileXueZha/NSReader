@@ -10,7 +10,7 @@ const BYTES_TEXT = ['B', 'K', 'M', 'G'];
 
 /**
  * Formatter
- * 
+ *
  * Provide human readble text, with consistence of the
  * entrie app.
  */
@@ -20,7 +20,7 @@ class Formatter {
      * + today => `09:02`
      * + this year => `11/03`
      * + in past years => `2010/01/31`
-     * 
+     *
      * @param {string|Date} datetime
      * @param {boolean} entire show entire date, eg: `2010/10/02 14:00`
      * @returns {string}
@@ -65,14 +65,14 @@ class Formatter {
 
     /**
      * Convert bytes to K/M/G
-     * 
+     *
      * @param {number} intBytes
      * @returns {string}
      */
     bytes(intBytes) {
         let i = 0;
         while (intBytes >= BYTES_THRESHOLD[i]) {
-            i ++;
+            i++;
         }
 
         const idx = i - 1;

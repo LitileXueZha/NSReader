@@ -1,4 +1,6 @@
-import React, { useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, {
+    useContext, useEffect, useImperativeHandle, useRef, useState,
+} from 'react';
 import {
     Animated,
     Modal,
@@ -54,7 +56,7 @@ export function createPanResponder(featInstance) {
         onPanResponderMove(e, gestureState) {
             const { dx, vx } = gestureState;
             // console.log(dx, panning);
-            if (dx < -55 && panning) {
+            if (dx < -25 && panning) {
                 panning = false;
                 Vibration.vibrate(20);
                 featInstance.setVisible(true);
@@ -108,8 +110,9 @@ function AttachFeaturesFC(props, ref) {
                 duration: 250,
                 useNativeDriver: true,
             }),
-            Animated.spring(translateX, {
+            Animated.timing(translateX, {
                 toValue: 120,
+                duration: 200,
                 useNativeDriver: true,
             }),
         ]).start(() => {
@@ -145,10 +148,15 @@ function AttachFeaturesFC(props, ref) {
         </Modal>
     );
 }
-export const AttachFeatures = React.forwardRef(AttachFeaturesFC);
+function areEqual() {
+    return true;
+}
+export const AttachFeatures = React.memo(React.forwardRef(AttachFeaturesFC), areEqual);
 
 function TabButton(props) {
-    const { onPress, icon, anim, children } = props;
+    const {
+        onPress, icon, anim, children,
+    } = props;
     const { theme, typo } = useContext(AppContext);
     const btnStyle = {
         backgroundColor: theme.bgModalBody,

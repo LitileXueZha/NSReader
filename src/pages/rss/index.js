@@ -21,6 +21,10 @@ import MRSS from '../../models/RSS.js';
 import format from '../../utils/format.js';
 import { goto } from '../../components/Link.js';
 import C from '../../components/globalCSSStyles.js';
+import Navbar from '../../components/Navbar.js';
+import aps from '../../AppSettings.js';
+import $ev from '../../utils/Event.js';
+import { debounce } from '../../utils/index.js';
 
 const TDATA = [
     { title: '奇客Solidot–传递最新科技情报', date: new Date(), description: '奇客的知识，重要的东西。', rcIdx: 2, enabled: true },
@@ -35,6 +39,7 @@ class RSS extends Component {
             sources: Object.values(MRSS.data),
             refreshing: false,
         };
+        this.easymode = Boolean(aps.get('settings.easymode'));
     }
 
     componentDidMount() {
@@ -42,31 +47,58 @@ class RSS extends Component {
         //     this.setState({ sources: getRandomSources(20) });
         // }, 1000);
         if (!MRSS.initialized) {
-            MRSS.init().then(() => this.setState({
-                sources: Object.values(MRSS.data),
-            }));
+            MRSS.init().then(this.update);
         }
+        $ev.on('rsschange', this.update);
     }
 
-    onRefresh = () => {
+    componentWillUnmount() {
+        $ev.off('rsschange', this.update);
+    }
+
+    // eslint-disable-next-line
+    update = debounce(() => {
+        // this.forceUpdate();
+        this.setState({ sources: Object.values(MRSS.data) });
+    });
+
+    onRefresh = async () => {
         this.setState({ refreshing: true });
-        setTimeout(() => {
-            this.setState({ refreshing: false, sources: getRandomSources(200) });
-        }, 1000);
+        await MRSS.fetchAll();
+        this.update();
+        this.setState({ refreshing: false });
     }
 
     onSourceAdd = () => {
         goto(IDRSSAdd);
     };
 
-    onSourcePress = (index) => {
-        const { sources } = this.state;
-        const { id } = sources[index];
+    onSourcePress = (item) => {
+        const { id } = item;
         goto(IDRSSDetail, { id });
     }
 
-    onToggleEnabled = (enabled, item) => {
-        console.log(enabled, item);
+    onToggleEnabled = (item, index) => {
+        const { title, enabled } = item;
+        const message = enabled ? '关闭此 RSS 源内容更新' : '启用更新';
+
+        Alert.alert(title, message, [{
+            text: !enabled ? '好的' : '确认',
+            onPress: () => {
+                const sources = this.state.sources.map((value, i) => {
+                    // Only one update
+                    if (i === index) {
+                        return { ...value, enabled: !enabled };
+                    }
+                    return value;
+                });
+                this.setState({ sources });
+                MRSS.update(item.id, { enabled: +(!enabled) });
+            },
+        }, {
+            text: '取消',
+            style: 'cancel',
+        }], { cancelable: true });
     }
 
     onTutorialPress = () => {
@@ -77,8 +109,8 @@ class RSS extends Component {
         <SourceItem
             key={item.title}
             data={item}
-            onPress={() => this.onSourcePress(index)}
-            onToggleEnabled={this.onToggleEnabled}
+            onPress={() => this.onSourcePress(item)}
+            onToggleEnabled={() => this.onToggleEnabled(item, index)}
         />
     )
 
@@ -100,6 +132,7 @@ class RSS extends Component {
 
         return (
             <>
+                {this.easymode && <Navbar title="RSS源" />}
                 <FlatList
                     style={C.f1}
                     data={sources}
@@ -107,7 +140,7 @@ class RSS extends Component {
                     refreshing={refreshing}
                     onRefresh={this.onRefresh}
                     contentContainerStyle={css.minH100}
-                    ListEmptyComponent={<Empty />}
+                    ListEmptyComponent={Empty}
                     ListHeaderComponent={(
                         <View style={{ paddingHorizontal: typo.padding, marginBottom: typo.margin }}>
                             <View style={{ marginVertical: typo.margin }}>

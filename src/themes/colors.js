@@ -1,6 +1,6 @@
 /**
  * Color Palette
- * 
+ *
  * @deprecated
  * From a Dribble user, main reference is:
  * https://dribbble.com/shots/3285924-Reader-for-Selfoss.

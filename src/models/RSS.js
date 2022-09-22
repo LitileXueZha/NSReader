@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid/non-secure';
 import Perf from '../utils/Perf.js';
 import MStory from './Story.js';
 import parseRSS from '../utils/RSSParser.js';
+import $ev from '../utils/Event.js';
 
 /** The download file path when add rss */
 export const RSS_ADD_DLP = `${fs.CachesDirectoryPath}/rssadd.tmp`;
@@ -17,9 +18,12 @@ const RSS_DEFAULT_EXTRA = {
     alias: '',
     /** Should rss auto update */
     enabled: 1,
+    /** As daily */
+    daily: 0,
 };
 const RSS_INDEX = 'index.json';
 const REG_URL_ORIGIN = /^(https?:\/\/([\w-]+\.)+[\w-]+)/;
+const FETCH_TIMEOUT = 15; // seconds
 
 /**
  * Abstract data layer of rss
@@ -88,13 +92,14 @@ class RSSSource {
 
     /**
      * Fetch a rss source from remote origin
-     * 
+     *
      * @param {string} id
      */
     async fetch(id) {
+        Perf.log('Fetching RSSSource %s', id);
         const { url } = this.data[id];
         const ac = new AbortController();
-        const timer = setTimeout(() => ac.abort(), 30000); // 30s
+        const timer = setTimeout(() => ac.abort(), FETCH_TIMEOUT * 1000);
         const resp = await fetch(url, {
             method: 'GET',
             redirect: 'follow',
@@ -125,18 +130,25 @@ class RSSSource {
 
     async fetchAll() {
         await this.init();
-        const ids = Object.keys(this.data);
+        // const ids = Object.keys(this.data);
+        const ids = [];
+
+        // eslint-disable-next-line
+        for (const id in this.data) {
+            const { enabled } = this.data[id];
+            if (enabled) {
+                ids.push(id);
+            }
+        }
         const tasks = ids.map((id) => this.fetch(id));
 
         // Concurrent mode
-        await Promise.all(tasks).catch((e) => {
-            Perf.error(e);
-        });
+        await Promise.all(tasks).catch(Perf.error);
     }
 
     /**
      * Update on local
-     * 
+     *
      * @param {string} id
      * @param {object} data
      */
@@ -149,7 +161,7 @@ class RSSSource {
 
     /**
      * Delete a rss source
-     * 
+     *
      * There are a series of works:
      * + delete rss memory
      * + delete rss data files
@@ -163,11 +175,19 @@ class RSSSource {
         }
         delete this.data[id];
         await fs.unlink(`${RSS_DIR}/${id}`);
+        $ev.emit('rsschange');
         MStory.delete(id);
     }
 
     /**
      * Parse the saved rss files
+     *
+     * Be careful of JavaScript event-loop(single-thread mechanism), too many tasks
+     * will cause the thread in a "busy" state, the task which is at the end of queue
+     * will seems a bit slow when executed.
+     *
+     * For the peformance, make sure there are no frequent tasks when parsing the
+     * local files, eg: debounce the ui-update task
      */
     async parseLocalStory() {
         const ids = Object.keys(this.data);
@@ -186,7 +206,10 @@ class RSSSource {
             }
 
             const id = ids[i];
-            const xmlFiles = dirs[i].filter((v) => v.name !== RSS_INDEX);
+            Perf.log('Parsing RSSSource %s', id);
+            const xmlFiles = dirs[i].filter((v) => v.name !== RSS_INDEX)
+                // Fix the unexpected save same mutiple stories
+                .sort((a, b) => a.mtime - b.mtime);
             const readTasks = xmlFiles.map((xml) => fs.readFile(xml.path));
             const contents = await Promise.all(readTasks);
 
@@ -205,10 +228,10 @@ class RSSSource {
         Perf.log('get RSS#countList');
         const list = Object.values(this.data);
         const fnMap = (item) => {
-            const { id, title } = item;
+            const { id, title, alias } = item;
             const total = MStory._ids[id]?.list.length || 0;
 
-            return { id, title, total };
+            return { id, title: alias || title, total };
         };
 
         return list.map(fnMap);
@@ -221,6 +244,7 @@ class RSSSource {
         await fs.writeFile(`${RSS_DIR}/${id}/${RSS_INDEX}`, content).catch((e) => {
             Perf.error(e);
         });
+        $ev.emit('rsschange');
     }
 
     _getMetadata(dataParsed) {

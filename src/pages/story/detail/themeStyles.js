@@ -1,6 +1,6 @@
 /**
  * Transform app theme to css styles
- * 
+ *
  * @param {*} context
  * @returns {string}
  */

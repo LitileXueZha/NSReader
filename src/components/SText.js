@@ -5,7 +5,7 @@ import { AppContext } from '../AppContext.js';
 
 /**
  * Text with styles
- * 
+ *
  * @param {import('react-native').TextProps} props
  */
 function SText(props) {

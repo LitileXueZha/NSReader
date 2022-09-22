@@ -18,11 +18,13 @@ export default function RowAction(props) {
         type = 'checkbox',
         defaultValue,
         onPress,
+        borderless,
     } = props;
     const { theme, typo } = useContext(AppContext);
     const rowStyle = {
         padding: typo.padding,
         borderColor: theme.borderColor,
+        borderTopWidth: borderless ? 0 : StyleSheet.hairlineWidth,
     };
     const tipStyle = {
         marginTop: 4,
@@ -37,37 +39,35 @@ export default function RowAction(props) {
 
     return (
         <Touchable onPress={onValueChange}>
-            <View style={{ paddingLeft: typo.margin }}>
-                <View style={[css.row, rowStyle]}>
-                    <View style={css.rowLabel}>
-                        <Text>{label}</Text>
-                        {tip && (
-                            <Text style={tipStyle} secondary>{tip}</Text>
-                        )}
-                    </View>
-                    {type === 'checkbox' && (
-                        <Checkbox
-                            value={value}
-                            onValueChange={onValueChange}
-                            tintColors={{
-                                false: theme.fontColorSecond,
-                                true: theme.primaryColor,
-                            }}
-                            style={{ height: typo.mSize }}
-                        />
-                    )}
-                    {type === 'switch' && (
-                        <Switch
-                            value={value}
-                            onValueChange={onValueChange}
-                            trackColor={{
-                                false: theme.fontColorSecond,
-                                true: theme.bgStoryFlag,
-                            }}
-                            thumbColor={value ? theme.primaryColor : '#f4f3f4'}
-                        />
+            <View style={[css.row, rowStyle]}>
+                <View style={css.rowLabel}>
+                    <Text>{label}</Text>
+                    {tip && (
+                        <Text style={tipStyle} secondary>{tip}</Text>
                     )}
                 </View>
+                {type === 'checkbox' && (
+                    <Checkbox
+                        value={value}
+                        onValueChange={onValueChange}
+                        tintColors={{
+                            false: theme.fontColorSecond,
+                            true: theme.primaryColor,
+                        }}
+                        style={{ height: typo.mSize }}
+                    />
+                )}
+                {type === 'switch' && (
+                    <Switch
+                        value={value}
+                        onValueChange={onValueChange}
+                        trackColor={{
+                            false: theme.fontColorSecond,
+                            true: theme.bgStoryFlag,
+                        }}
+                        thumbColor={value ? theme.primaryColor : '#f4f3f4'}
+                    />
+                )}
             </View>
         </Touchable>
     );
@@ -78,11 +78,9 @@ const css = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingLeft: 0,
-        borderTopWidth: StyleSheet.hairlineWidth,
     },
     rowLabel: {
         flex: 1,
-        marginRight: 20,
+        marginRight: 12,
     },
 });

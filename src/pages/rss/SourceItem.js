@@ -1,5 +1,7 @@
 import React, { useContext, useMemo, useState } from 'react';
-import { Button, View, StyleSheet, Alert } from 'react-native';
+import {
+    Button, View, StyleSheet, Alert,
+} from 'react-native';
 
 import { TouchHighlight } from '../../components/Touchable.js';
 import Text from '../../components/SText.js';
@@ -30,44 +32,21 @@ function SourceItem(props) {
             lineHeight: typo.fontSize * 1.15,
         },
     }), [theme, typo]);
-    const [enabled, setEnabled] = useState(data.enabled);
-    const disabledStyle = !enabled && {
+    const disabledStyle = !data.enabled && {
         color: theme.fontColorSecond,
-    };
-    const onItemPress = () => {
-        onPress?.();
-    };
-    const onItemLongPress = () => {
-        const { title } = data;
-        const message = !enabled
-            ? '启用更新'
-            : '关闭此 RSS 源内容更新';
-        Alert.alert(title, message, [
-            {
-                text: !enabled ? '好的' : '确认',
-                onPress: () => {
-                    setEnabled(!enabled);
-                    onToggleEnabled(!enabled, data);
-                },
-            },
-            {
-                text: '取消',
-                style: 'cancel',
-            },
-        ], { cancelable: true });
     };
 
     return (
-        <TouchHighlight onPress={onItemPress} onLongPress={onItemLongPress} style={memoStyles.touch}>
+        <TouchHighlight onPress={onPress} onLongPress={onToggleEnabled} style={memoStyles.touch}>
             <View style={memoStyles.container}>
                 <View style={css.info}>
                     <View style={css.richText}>
-                        <Text style={[disabledStyle, memoStyles.title]}>{data.title}</Text>
+                        <Text style={[disabledStyle, memoStyles.title]}>{data.alias || data.title}</Text>
                         <View style={css.hint}>
                             <Text style={C.fs12} secondary>
                                 {format.date(data.date)}
                             </Text>
-                            {!enabled && (
+                            {!data.enabled && (
                                 <View style={[css.badge, { backgroundColor: theme.dangerColor }]}>
                                     <Text style={[css.notEnabled, { color: theme.fgOnPaper }]}>未启用</Text>
                                 </View>
@@ -115,7 +94,12 @@ const css = StyleSheet.create({
 });
 
 function areEqual(prevProps, nextProps) {
-    // Nothing need to re-rendered after the first render
+    if (
+        prevProps.data.enabled !== nextProps.data.enabled
+        || prevProps.data.alias !== nextProps.data.alias
+    ) {
+        return false;
+    }
     return true;
 }
 

@@ -17,6 +17,7 @@ import ModalTheme, { THEME_LIST } from './ModalTheme.js';
 import aps from '../../AppSettings.js';
 import { goto } from '../../components/Link.js';
 import C from '../../components/globalCSSStyles.js';
+import Navbar from '../../components/Navbar.js';
 
 class Settings extends Component {
     constructor() {
@@ -69,29 +70,19 @@ class Settings extends Component {
 
         return (
             <>
+                {this.easymode && <Navbar title="设置" />}
                 <ScrollView style={{ flex: 1, backgroundColor: theme.bgPaperInset }}>
                     <View style={[css.head, { backgroundColor: theme.background, padding: typo.padding }]}>
-                        <View style={[css.logo, { backgroundColor: theme.primaryColor, padding: typo.padding }]}>
+                        <View style={[css.logo, { backgroundColor: theme.primaryColor }]}>
                             <Text style={css.logoText}>₯</Text>
                         </View>
                     </View>
                     <View style={sectionStyle}>
                         <SettingItem
                             type="select"
-                            text={(
-                                <View style={css.lang}>
-                                    <Text>语言</Text>
-                                    <Icon
-                                        name="globe-outline"
-                                        size={typo.fontHeight}
-                                        color={theme.fontColor}
-                                        style={C.margin.l4}
-                                    />
-                                </View>
-                            )}
+                            text="语言 🌏"
                             value="中文"
                             onPress={() => {}}
-                            // icon={<Icon name="globe-outline" size={typo.fontHeight} color={theme.fontColorSecond} />}
                         />
                         <SettingItem
                             type="select"
@@ -153,6 +144,7 @@ const css = StyleSheet.create({
     },
     logo: {
         marginLeft: 4,
+        padding: 16,
         borderRadius: 6,
     },
     logoText: {

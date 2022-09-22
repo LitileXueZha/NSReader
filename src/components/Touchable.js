@@ -36,7 +36,7 @@ function NativeFeedback(props) {
 
 /**
  * Touchable
- * 
+ *
  * Use native feedback on Android, highlight on iOS.
  */
 export default Platform.select({

@@ -1,4 +1,6 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+    useContext, useEffect, useRef, useState,
+} from 'react';
 import {
     StyleSheet,
     Animated,
@@ -53,7 +55,7 @@ const css = StyleSheet.create({
 
 /**
  * Define how to show the button
- * 
+ *
  * Bind in the class constructor,
  * eg: `this.onScroll = setScrollTop.bind(this)`
  * @param {any} e
@@ -70,4 +72,11 @@ export function setScrollTop(e) {
     }
 }
 
-export default React.memo(ScrollToTop);
+function areEqual(prevProps, nextProps) {
+    if (prevProps.visible !== nextProps.visible) {
+        return false;
+    }
+    return true;
+}
+
+export default React.memo(ScrollToTop, areEqual);

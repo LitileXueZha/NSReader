@@ -2,7 +2,7 @@ import emmet from 'emmet';
 
 /**
  * Randomize a story list **(DEV only)**
- * 
+ *
  * @param {number} length
  */
 export function getRandomStories(length = 20) {
@@ -23,14 +23,14 @@ export function getRandomStories(length = 20) {
             rcIdx,
             read,
         });
-        i ++;
+        i++;
     }
     return values;
 }
 
 /**
  * Randomize a rss sources list **(DEV only)**
- * 
+ *
  * @param {number} length
  */
 export function getRandomSources(length = 20) {
@@ -51,7 +51,7 @@ export function getRandomSources(length = 20) {
             rcIdx,
             enabled,
         });
-        i ++;
+        i++;
     }
     return values;
 }

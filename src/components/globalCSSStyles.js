@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 /**
  * Global shorthand styles
- * 
+ *
  * Usage: `C.f1` or chain `C.flex.row`
  */
 const C = StyleSheet.create({

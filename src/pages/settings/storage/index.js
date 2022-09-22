@@ -62,7 +62,7 @@ class Storage extends Component {
 
     /**
      * Cache of `react-native-fast-image`
-     * 
+     *
      * Currently found in 'cache/image_manager_disk_cache' on Android
      */
     // eslint-disable-next-line
@@ -105,7 +105,9 @@ class Storage extends Component {
 
     render() {
         const { theme, typo } = this.context;
-        const { fsInfo, cache, dataSource, setting } = this.state;
+        const {
+            fsInfo, cache, dataSource, setting,
+        } = this.state;
         const progressStyle = {
             backgroundColor: theme.successColor,
             height: '100%',

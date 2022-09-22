@@ -7,6 +7,7 @@ import { themes } from './themes';
 import TYPO from './themes/typography.js';
 import aps from './AppSettings.js';
 import { getDefaultOptions, getComponentOptions } from './options.js';
+import Perf from './utils/Perf.js';
 
 const themeIDs = Object.keys(themes);
 let themeChangeTimer = null;
@@ -17,7 +18,7 @@ const defaultValue = {
 };
 export const AppContext = React.createContext(defaultValue);
 
-export default class App extends React.PureComponent {
+export default class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -56,6 +57,7 @@ export default class App extends React.PureComponent {
     }
 
     render() {
+        Perf.log('<App/> render');
         return (
             <AppContext.Provider value={this.state}>
                 {this.props.children}

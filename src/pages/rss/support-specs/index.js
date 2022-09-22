@@ -155,7 +155,7 @@ const css = StyleSheet.create({
     row: {
         justifyContent: 'space-between',
         alignItems: 'center',
-    }
+    },
 });
 
 export default SupportSpecs;

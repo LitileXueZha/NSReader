@@ -50,10 +50,10 @@ export function configureNotification(fnNotify) {
 
 /**
  * Create a notification for user
- * 
+ *
  * Make sure `configureNotification` has been called.
  * Follow the HTML5 Notification API.
- * 
+ *
  * @type {Notification}
  */
 export default function Notification(title, options) {

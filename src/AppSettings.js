@@ -10,7 +10,7 @@ const WRITE_THRESHOLD = 300;
 
 /**
  * App settings controller
- * 
+ *
  * Read settings from local file system, and save into it.
  */
 class AppSettings {
@@ -24,7 +24,7 @@ class AppSettings {
 
     /**
      * Init settings
-     * 
+     *
      * It should be called when app launched at once.
      * @param {boolean} force
      */
@@ -46,7 +46,7 @@ class AppSettings {
 
     /**
      * Read a settings item
-     * 
+     *
      * @param {string} key See avaliable values in `settings.json`
      */
     get(key) {
@@ -58,7 +58,7 @@ class AppSettings {
 
     /**
      * Update and save settings
-     * 
+     *
      * @param {string} key
      * @param {string|number} value
      */

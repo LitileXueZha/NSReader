@@ -44,6 +44,7 @@ class RSSDetail extends Component {
             id: 'del',
             text: '删除',
         }];
+        this.data = {};
     }
 
     componentDidMount() {
@@ -53,6 +54,10 @@ class RSSDetail extends Component {
                 onPress: goBack,
             }]);
         }
+    }
+
+    componentWillUnmount() {
+        this.onSave();
     }
 
     onMenuPress = (index) => {
@@ -84,14 +89,24 @@ class RSSDetail extends Component {
         }
     }
 
-    onSave = () => {
-
+    onSave = async () => {
+        if (Object.values(this.data).length > 0) {
+            await MRSS.update(this.source.id, this.data);
+            this.data = {};
+        }
     }
 
-    onEnabledChange = () => {
+    onAliasChange = (text) => {
+        this.data.alias = text;
     }
 
-    onDailyChange = () => {}
+    onEnabledChange = (value) => {
+        this.data.enabled = +value;
+    }
+
+    onDailyChange = (value) => {
+        this.data.daily = +value;
+    }
 
     onRefresh = async () => {
         if (this.source?.id) {
@@ -138,31 +153,35 @@ class RSSDetail extends Component {
                     )}
                     // showsVerticalScrollIndicator={false}
                 >
-                    <View style={{ margin: typo.margin*2, marginVertical: typo.margin * 2 }}>
+                    <View style={{ margin: typo.margin * 2 }}>
                         <View style={[css.inputWrapper, { borderColor: theme.borderColor, backgroundColor: theme.bgPaperInset }]}>
                             <TextInput
                                 style={inputStyle}
                                 placeholder={this.source?.title}
                                 placeholderTextColor={theme.fontColorSecond}
                                 defaultValue={this.source?.alias}
+                                onChangeText={this.onAliasChange}
                             />
                         </View>
                         <Text style={css.tip} secondary>
                             设置RSS源别名（应用内显示的标题）
                         </Text>
                     </View>
-                    <RowAction
-                        label="启用"
-                        defaultValue={this.source?.enabled}
-                        type="switch"
-                        onPress={this.onEnabledChange}
-                    />
-                    <RowAction
-                        label="每日更新"
-                        tip="设置为每日更新的 RSS 源在阅读列表中只查看今天的数据。适用于排行榜等每天更新的源"
-                        defaultValue={false}
-                        onPress={this.onDailyChange}
-                    />
+                    <View style={[css.actions, { borderColor: theme.borderColor, marginHorizontal: typo.margin }]}>
+                        <RowAction
+                            label="启用"
+                            defaultValue={this.source?.enabled}
+                            type="switch"
+                            onPress={this.onEnabledChange}
+                            borderless
+                        />
+                        <RowAction
+                            label="每日更新"
+                            tip="设置为每日更新的 RSS 源在阅读列表中只查看今天的数据。适用于排行榜等每天更新的源"
+                            defaultValue={this.source?.daily}
+                            onPress={this.onDailyChange}
+                        />
+                    </View>
                     {/* TODO: 每日更新，设置为每日更新的 RSS 源在阅读列表中只查看今天的数据。适用于排行榜等每天更新的源 */}
                     <View style={css.area}>
                         <View style={[css.bubble, { backgroundColor: theme.bgStoryFlag }]}>
@@ -174,7 +193,6 @@ class RSSDetail extends Component {
                         <RowInfo
                             label="URL"
                             value={decodeURIComponent(this.source?.url)}
-                            borderless
                         />
                         <RowInfo label="标题" value={this.source?.title} />
                         <RowInfo label="描述" value={this.source?.description} />
@@ -207,6 +225,10 @@ const css = StyleSheet.create({
         fontSize: 12,
         marginLeft: 8,
     },
+    actions: {
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: 6,
+    },
     area: {
         flexDirection: 'row',
         marginTop: 60,
@@ -214,7 +236,7 @@ const css = StyleSheet.create({
     bubble: {
         padding: 4,
         paddingHorizontal: 8,
-        marginBottom: 20,
+        marginBottom: 16,
         marginLeft: 20,
         borderRadius: 4,
     },

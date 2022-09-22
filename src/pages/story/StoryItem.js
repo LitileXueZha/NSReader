@@ -1,5 +1,7 @@
 import React, { useContext, useMemo, useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import {
+    View, StyleSheet, Pressable, InteractionManager,
+} from 'react-native';
 
 import Text from '../../components/SText.js';
 import { AppContext } from '../../AppContext.js';
@@ -8,6 +10,8 @@ import format from '../../utils/format.js';
 import Favicon from '../../components/Favicon.js';
 import C from '../../components/globalCSSStyles.js';
 import MStory from '../../models/Story.js';
+import { pages } from '../../themes';
+import Badge from '../../components/Badge.js';
 
 function StoryItem(props) {
     const {
@@ -19,19 +23,22 @@ function StoryItem(props) {
     } = props;
     const [read, setRead] = useState(data.read);
     const { theme, typo } = useContext(AppContext);
+    const themePage = pages[theme.id].story;
     const memoStyles = useMemo(() => ({
-        wrapper: {
-            paddingLeft: typo.padding + 4,
-        },
         row: {
+            marginLeft: typo.padding + 4,
             paddingVertical: typo.padding,
             paddingRight: typo.padding + 4,
             borderColor: theme.borderColor,
             borderBottomWidth: StyleSheet.hairlineWidth,
         },
         flag: [css.flag, {
-            backgroundColor: theme.bgStoryFlag,
+            backgroundColor: themePage.flag,
             color: theme.fontColorSecond,
+        }],
+        flagUpdate: [css.flag, {
+            backgroundColor: themePage.flagSuccess,
+            color: theme.fgOnPaper,
         }],
         title: {
             fontSize: typo.h2.fontSize,
@@ -44,7 +51,7 @@ function StoryItem(props) {
         },
     }), [theme, typo]);
     const readStyle = read && {
-        color: theme.fontColorSecond,
+        color: themePage.fgRead,
     };
     const onItemPress = () => {
         onPress?.(data);
@@ -56,32 +63,33 @@ function StoryItem(props) {
 
     return (
         <TouchHighlight onPress={onItemPress}>
-            <View style={memoStyles.wrapper} collapsable>
-                <View style={memoStyles.row}>
-                    <View style={css.flagRow}>
-                        {flagIndex && (
-                            <Text style={memoStyles.flag}>{`#${flagIndex}`}</Text>
-                        )}
-                        {flagPast && (
-                            <Text style={memoStyles.flag}>更早以前</Text>
-                        )}
-                    </View>
-                    <Text style={[readStyle, memoStyles.title]}>
-                        {prettyText(data.title)}
-                    </Text>
-                    {!hideSummary && (
-                        <Text
-                            style={[readStyle, memoStyles.desc]}
-                            numberOfLines={3}
-                            ellipsizeMode="tail"
-                        >
-                            {prettyText(data.desc)}
-                        </Text>
+            <View style={memoStyles.row} collapsable>
+                <View style={css.flagRow}>
+                    {flagIndex && (
+                        <Text style={memoStyles.flag}>{`#${flagIndex}`}</Text>
                     )}
-                    <View style={css.info}>
-                        <Text style={css.date} secondary>{format.date(data.date)}</Text>
-                        <Favicon id={data.pid} size={12} radius={12} />
-                    </View>
+                    {flagPast && (
+                        <Text style={memoStyles.flag}>更早以前</Text>
+                    )}
+                    {flagPast && (
+                        <Text style={memoStyles.flagUpdate}>上次更新于</Text>
+                    )}
+                </View>
+                <Text style={[readStyle, memoStyles.title]}>
+                    {prettyText(data.title)}
+                </Text>
+                {!hideSummary && (
+                    <Text
+                        style={[readStyle, memoStyles.desc]}
+                        numberOfLines={3}
+                        ellipsizeMode="tail"
+                    >
+                        {prettyText(data.desc)}
+                    </Text>
+                )}
+                <View style={css.info}>
+                    <Text style={css.date} secondary>{format.date(data.date)}</Text>
+                    <Favicon id={data.pid} size={12} radius={12} />
                 </View>
             </View>
         </TouchHighlight>
@@ -115,16 +123,16 @@ const css = StyleSheet.create({
         paddingVertical: 2,
         fontSize: 12,
         lineHeight: 14,
-        borderRadius: 4,
+        borderRadius: 6,
     },
 });
 
 /**
  * Decide the story item should update
- * 
+ *
  * This is a big optimization for FlatList!!!
  * Don't use `React.PureComponent` or `React.memo` separately.
- * 
+ *
  * The side effect is that you must specify the props
  * manually when updated.
  */

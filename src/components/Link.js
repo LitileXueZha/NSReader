@@ -13,13 +13,13 @@ import Perf from '../utils/Perf.js';
 
 /**
  * Open link in app
- * 
+ *
  * 1. switch tab
  * 2. in-app route
  * 3. web url which starts with `http`
- * 
+ *
  * In others case, call `Linking.openURL` directly.
- * 
+ *
  * @param {import('react-native').TextProps} props
  */
 export default function Link(props) {
@@ -57,7 +57,7 @@ export default function Link(props) {
 
 /**
  * Open a link (with settings configured)
- * 
+ *
  * @param {string} url
  */
 export function openLink(url) {
@@ -78,7 +78,7 @@ export function openLink(url) {
 
 /**
  * Navigate to a app page
- * 
+ *
  * @param {symbol|string} to app's route id
  * @param {object} data passed data at `props.route`
  * @returns {boolean} is in-app page

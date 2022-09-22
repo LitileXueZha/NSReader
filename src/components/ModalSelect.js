@@ -1,4 +1,6 @@
-import React, { useState, useContext, useRef } from 'react';
+import React, {
+    useState, useContext, useRef, useMemo,
+} from 'react';
 import {
     View,
     Modal,
@@ -17,6 +19,7 @@ import { AppContext } from '../AppContext.js';
 import Text from './SText.js';
 import Option from './ModalSelectOption.js';
 import { GOLD_RATIO } from '../themes/typography.js';
+import Perf from '../utils/Perf.js';
 
 const TDATA = [{
     text: '全部',
@@ -50,9 +53,6 @@ function ModalSelect(props) {
         fontSize: typo.fontSizeSmall,
     };
 
-    const onRequestClose = () => {
-        onHide(activeIdx);
-    };
     const { height } = useWindowDimensions();
     const maxHeightBody = height * GOLD_RATIO - 48;
     const opacity = useRef(new Animated.Value(0)).current;
@@ -67,13 +67,27 @@ function ModalSelect(props) {
     const onHide = (index) => {
         Animated.timing(opacity, {
             toValue: 0,
-            duration: 250,
+            duration: 150,
             easing: Easing.ease,
             useNativeDriver: true,
         }).start(() => {
             onClose(index);
         });
     };
+    const onRequestClose = () => {
+        onHide(activeIdx);
+    };
+    const options = useMemo(() => datalist.map((item, index) => (
+        <Option
+            key={item.text}
+            data={item}
+            active={index === activeIdx}
+            onPress={() => {
+                setActiveIdx(index);
+                onHide(index);
+            }}
+        />
+    )), [datalist, activeIdx]);
 
     return (
         <Modal
@@ -86,11 +100,11 @@ function ModalSelect(props) {
         >
             {/**
              * Why use a separate overlay?
-             * 
+             *
              * Put ScrollView in a touchable view will cause it lag,
              * maybe RN need to handle touch events, so sometimes the
              * scroll behaviour is not responsed.
-             * 
+             *
              * This is a hack... (Seems only appear in Hermes)
              */}
             {/* <Pressable style={css.overlay} onPress={onRequestClose} /> */}
@@ -101,17 +115,7 @@ function ModalSelect(props) {
                             <Text style={titleStyle}>{title}</Text>
                         )}
                         <ScrollView style={{ maxHeight: maxHeightBody }} disableScrollViewPanResponder>
-                            {datalist.map((item, index) => (
-                                <Option
-                                    key={item.text}
-                                    data={item}
-                                    active={index === activeIdx}
-                                    onPress={() => {
-                                        setActiveIdx(index);
-                                        onHide(index);
-                                    }}
-                                />
-                            ))}
+                            {options}
                         </ScrollView>
                     </View>
                 </Animated.View>
@@ -137,4 +141,14 @@ const css = StyleSheet.create({
     },
 });
 
-export default ModalSelect;
+function areEqual(prevProps, nextProps) {
+    if (
+        prevProps.visible !== nextProps.visible
+        || prevProps.datalist !== nextProps.datalist
+    ) {
+        return false;
+    }
+    return true;
+}
+
+export default React.memo(ModalSelect, areEqual);

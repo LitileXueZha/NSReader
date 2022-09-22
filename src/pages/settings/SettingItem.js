@@ -9,7 +9,7 @@ import Touchable from '../../components/Touchable.js';
 
 /**
  * Setting Item
- * 
+ *
  * Supported types: `enum("plain","link","select","checkbox")`, default is "plain".
  */
 export default function SettingItem(props) {

@@ -33,7 +33,7 @@ export default class RSSAdd extends Component {
             result: null,
             largeFile: false,
         };
-        this.URL = 'https://www.solidot.org/index.rss';
+        this.URL = '';
         // this.URL = 'http://www.ruanyifeng.com/blog/atom.xml';
         this.logRef = React.createRef();
         this.error = '';
@@ -134,7 +134,7 @@ export default class RSSAdd extends Component {
             return;
         }
         this.logRef.current.write('失败');
-        this.showResult({ success: false });
+        this.showResult({ success: false, support: true });
     }
 
     save = (data) => {

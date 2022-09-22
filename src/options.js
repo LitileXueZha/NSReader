@@ -1,6 +1,6 @@
 /**
  * A hack for `Navigation.setDefaultOptions`
- * 
+ *
  * WHY? RNN's setDefaultOptions will reset previous options.
  * We have to save the options in memory, and merge it when
  * the default options changed.
@@ -21,7 +21,7 @@ export function getDefaultOptions() {
     /**
      * When device orientation changed, the animation width
      * should changed too.
-     * 
+     *
      * This is a little problem, use constant value will cause animation
      * a bit fast or slow.
      */
@@ -33,12 +33,24 @@ export function getDefaultOptions() {
         statusBar: {
             backgroundColor: theme.background,
         },
-        topBar: { visible: false },
+        topBar: {
+            visible: false,
+            background: {
+                color: theme.background,
+            },
+            title: {
+                color: theme.fontColor,
+            },
+            backButton: {
+                color: theme.fontColor,
+            },
+        },
         layout: {
             componentBackgroundColor: theme.background,
         },
         bottomTabs: {
             visible: !easymode,
+            currentTabId: TABStory,
             backgroundColor: theme.bottomTabsBackground,
             animate: false,
             // animateTabSelection: false,
@@ -128,9 +140,9 @@ export function getComponentOptions() {
 /**
  * Chrome debug error:
  *     Calling synchronous methods on native modules is not supported in Chrome.
- * 
+ *
  * Wrap the icons load function to a async.
- * 
+ *
  * This can also improve the first app render time. (✓)
  */
 const cachedIcons = {
@@ -198,15 +210,15 @@ const TAB_SETTINGS = {
 
 /**
  * The app root of RNN
- * 
+ *
  * With a built-in stack id: `root`, all navigations should be pushed
  * into it.
- * 
+ *
  * @example
  * ```javascript
  * Navigation.push('root', ...);
  * ```
- * 
+ *
  * @type {import('react-native-navigation').LayoutRoot}
  */
 export const DEFAULT_ROOT = {

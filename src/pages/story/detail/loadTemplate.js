@@ -5,7 +5,7 @@ import tpl from './index.html';
 /**
  * Non-image assets are not bundled in release/production build unless
  * put it in `android/.../assets`.
- * 
+ *
  * @see https://github.com/facebook/react-native/issues/7924
  */
 

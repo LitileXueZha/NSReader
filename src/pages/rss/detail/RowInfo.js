@@ -16,8 +16,6 @@ export default function RowInfo(props) {
         justifyContent: 'space-between',
         padding: typo.padding,
         paddingVertical: typo.padding + 2,
-        paddingLeft: 0,
-        marginLeft: typo.margin,
     };
     const borderStyle = borderless || {
         borderColor: theme.borderColor,
@@ -27,11 +25,11 @@ export default function RowInfo(props) {
 
     return (
         <View style={[rowStyle, borderStyle]}>
-            <Text style={{ width }}>{label}</Text>
+            <Text style={{ width }} secondary>{label}</Text>
             {
                 typeof value === 'string'
                     ? (
-                        <Text style={css.value} secondary selectable>
+                        <Text style={css.value} selectable>
                             {value}
                         </Text>
                     )

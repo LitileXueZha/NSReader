@@ -7,7 +7,7 @@ import iconEmptyDark from '../../assets/empty_dark.png';
 
 /**
  * Support types: `main`, `dark`
- * 
+ *
  * Pick the colors from https://primer.style/primitives/colors.
  */
 export const themes = {
@@ -29,7 +29,6 @@ export const themes = {
         bottomTabsBackground: light.canvas.inset,
         touchHighlight: light.neutral.subtle,
         touchFeedback: undefined, // on Android
-        bgStoryTopbar: light.canvas.default,
         bgModalBody: light.canvas.default,
         bgPaperInset: light.scale.gray[1],
         // bgDisabled: light.neutral.muted,
@@ -39,7 +38,7 @@ export const themes = {
 
         /**
          * Several colors
-         * 
+         *
          * Used to generate a random color when channel's image load failed.
          */
         randomColors: [
@@ -66,13 +65,12 @@ export const themes = {
         fontColorHead: '#ffffff',
         linkColor: dark.accent.fg,
         primaryColor: '#FFA733',
-        dangerColor: dark.danger.fg,
-        successColor: dark.success.fg,
+        dangerColor: dark.danger.emphasis,
+        successColor: dark.success.emphasis,
 
         bottomTabsBackground: dark.canvas.inset,
         touchHighlight: dark.neutral.subtle,
         touchFeedback: dark.neutral.muted,
-        bgStoryTopbar: dark.scale.gray[7],
         bgModalBody: dark.scale.gray[7],
         bgPaperInset: dark.scale.black,
         // bgDisabled: dark.neutral.muted,
@@ -129,13 +127,21 @@ export const buttons = {
  */
 export const pages = {
     main: {
-        story: {},
+        story: {
+            fgRead: '#24292f84',
+            flag: light.attention.muted,
+            flagSuccess: light.success.emphasis,
+        },
         rss: {
             bgTotal: light.success.subtle,
         },
     },
     dark: {
-        story: {},
+        story: {
+            fgRead: dark.fg.muted,
+            flag: dark.attention.muted,
+            flagSuccess: dark.success.emphasis,
+        },
         rss: {
             bgTotal: dark.success.subtle,
         },

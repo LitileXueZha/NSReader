@@ -133,7 +133,7 @@ export class RSSParser extends SAXParser {
                 const [k, subKey] = key.split('.');
                 if (!(k in data)) {
                     if (findValue instanceof Array) {
-                        data[k] = findValue.map(v => ({ [subKey]: v }));
+                        data[k] = findValue.map((v) => ({ [subKey]: v }));
                     } else {
                         data[k] = { [subKey]: findValue };
                     }
@@ -173,13 +173,13 @@ export class RSSParser extends SAXParser {
         // Helpers
         function mapDeepArray(o, key) {
             if (o instanceof Array) {
-                return o.map(oo => mapDeepArray(oo, key));
+                return o.map((oo) => mapDeepArray(oo, key));
             }
             return o[key];
         }
         function getText(o) {
             if (o instanceof Array) {
-                return o.map(oo => getText(oo));
+                return o.map((oo) => getText(oo));
             }
             if (attr) {
                 return o?.attributes[attr];

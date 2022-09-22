@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid/non-secure';
 
 import Perf from '../utils/Perf.js';
 import { insertStoryTo } from './Story.util.js';
-import { Event } from '../utils/Event.js';
+import $ev from '../utils/Event.js';
 
 const SL_DIR = `${fs.CachesDirectoryPath}/story`;
 const SL_DIR_JSOND = `${SL_DIR}/jsond`;
@@ -21,9 +21,8 @@ const EXTRA_DEFAULTS = {
     read: 0,
 };
 
-class StoryList extends Event {
+class StoryList {
     constructor() {
-        super();
         this.data = [];
         this.initialized = false;
         this.more = true;
@@ -57,7 +56,7 @@ class StoryList extends Event {
 
     /**
      * Add to story list
-     * 
+     *
      * @param {array} list stories
      * @param {object} rss parent rss source
      * @param {Date} mtime
@@ -142,13 +141,13 @@ class StoryList extends Event {
             this._cacheQueue.push(createWriteTask(SL_IDS, this._ids));
             this._cacheQueue.push(createWriteTask(ZERO, this.data.slice(0, MAX)));
             this.mkCache();
-            this.emit('storychange');
+            $ev.emit('storychange');
         }
     }
 
     /**
      * Update story list on local
-     * 
+     *
      * @param {string} id
      * @param {object} data
      */
@@ -167,7 +166,7 @@ class StoryList extends Event {
 
     /**
      * Also see `models/RSS#delete()`
-     * 
+     *
      * @param {string} pid parent rss id
      */
     async delete(pid) {
@@ -177,7 +176,7 @@ class StoryList extends Event {
         this._cacheQueue.push(createWriteTask(SL_IDS, this._ids));
         this._cacheQueue.push(createWriteTask(ZERO, this.data.slice(0, MAX)));
         this.mkCache();
-        this.emit('storychange');
+        $ev.emit('storychange');
         if (deleteItem) {
             const ids = deleteItem.list;
             const dirs = await fs.readDir(SL_DIR_JSOND);
@@ -192,7 +191,7 @@ class StoryList extends Event {
 
     /**
      * Load a part of stories
-     * 
+     *
      * @param {string} nextId
      * @param {number} size
      */
@@ -242,6 +241,12 @@ class StoryList extends Event {
         return fs.readFile(`${SL_DIR_HTML}/${id}.html`);
     }
 
+    /**
+     * Performance problem of write bunch of files.
+     *
+     * Write a file costs ≈5ms
+     * Write 2000 files costs 2000x5 ≈10s
+     */
     mkCache() {
         if (this._cacheWriting) {
             // Cache is writing, new tasks in queue will also be executed
@@ -263,7 +268,7 @@ class StoryList extends Event {
             }
             const { type, path, data } = currTask;
             if (type === 'write') {
-                const duplicateIndex = self._cacheQueue.findIndex((v) => v.path === path);
+                const duplicateIndex = self._cacheQueue.findLastIndex((v) => v.path === path);
                 // Skip the duplicate task
                 // Make sure just write once to disk in _cacheQueue
                 if (duplicateIndex < 0) {
@@ -277,7 +282,7 @@ class StoryList extends Event {
                     });
                 }
             }
-            await runTasks();
+            return runTasks();
         }
     }
 
@@ -322,5 +327,16 @@ function createWriteTask(path, data) {
         data,
     };
 }
+
+// eslint-disable-next-line no-extend-native
+Array.prototype.findLastIndex = function findLastIndex(callbackFn, thisArg) {
+    let i = this.length - 1;
+    while (i >= 0) {
+        const ok = callbackFn(this[i], i);
+        if (ok) return i;
+        i--;
+    }
+    return -1;
+};
 
 export default new StoryList();

@@ -7,16 +7,16 @@ const INTERVAL_DATA_FETCH = 24 * 60; // 1 day
 let configured = false;
 /**
  * Background tasks
- * 
+ *
  * There are much differences with unix-cron:
  * + it not works when app is cleaned by user (especially on Android, used to release the memory)
  * + only 30s can be run on iOS
  * + less headless
  * + strange behaviours
- * 
+ *
  * Conclusion: try to let user be sticky with app, then could
  * do better tasks rather than in background.
- * 
+ *
  * ```shell
  * adb logcat *:S ReactNative:V ReactNativeJS:V TSBackgroundFetch:V
  * adb shell cmd jobscheduler run -f com.nsreader 999
@@ -35,23 +35,26 @@ export default function configureBackgroundTasks() {
         // Android
         enableHeadless: true,
         stopOnTerminate: false, // important for headless task
-    }, async (taskId) => {
-        await rssUpdateTask();
-        BackgroundFetch.finish(taskId);
-    }, async (taskId) => {
-        BackgroundFetch.finish(taskId);
-    });
+    }, onTaskStart, onTimeout);
+    // Android background
     if (Platform.OS === 'android') {
-        // Android background
         BackgroundFetch.registerHeadlessTask(async ({ taskId, timeout }) => {
             if (timeout) {
-                BackgroundFetch.finish(taskId);
+                onTimeout(taskId);
                 return;
             }
-            await rssUpdateTask();
-            BackgroundFetch.finish(taskId);
+            onTaskStart(taskId);
         });
     }
+}
+
+async function onTimeout(taskId) {
+    BackgroundFetch.finish(taskId);
+}
+
+async function onTaskStart(taskId) {
+    await rssUpdateTask();
+    BackgroundFetch.finish(taskId);
 }
 
 async function rssUpdateTask() {

@@ -7,15 +7,15 @@ import {
     Pressable,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Checkbox from '@react-native-community/checkbox';
 
 import { BASE_SPACE, GOLD_RATIO } from '../../themes/typography.js';
 import { AppContext } from '../../AppContext.js';
 import Text from '../../components/SText.js';
-import ModalSelect from '../../components/ModalSelect.js';
 import Badge from '../../components/Badge.js';
 import Touchable, { TouchHighlight } from '../../components/Touchable.js';
 import useFilter from './useFilter.js';
+import TopbarCheckboxRow from './TopbarCheckboxRow.js';
+import C from '../../components/globalCSSStyles.js';
 
 export const STATUS_LOADING = 0;
 export const STATUS_UPDATING = 1;
@@ -27,43 +27,26 @@ const STATUS_TEXT = [TEXT_LOADING, TEXT_UPDATING];
 const SIZE = 24; // icon size, checkbox height...
 
 function Topbar(props) {
-    const { status, data, onFilter, onChannelChange } = props;
+    const {
+        status, data, onFilter, onPress,
+    } = props;
     const { theme, typo } = useContext(AppContext);
     const cssTopbar = {
         left: typo.margin,
         right: typo.margin,
-        backgroundColor: theme.bgStoryTopbar,
+        backgroundColor: theme.bgModalBody,
     };
     const cssFilterTitle = {
         color: theme.fontColorSecond,
         paddingLeft: SIZE + typo.padding * 2,
     };
-    const cssCheckbox = {
-        width: SIZE + typo.padding * 2,
-        alignItems: 'flex-end',
-    };
-    const ppCheckbox = {
-        style: { height: SIZE },
-        tintColors: {
-            false: theme.fontColorSecond,
-            true: theme.primaryColor,
-        },
-    };
     const loaded = status === STATUS_DONE;
-    const [filterOpen, setFilterOpen] = useState(false);
+    const [open, setOpen] = useState(false);
     const openFilterMenu = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setFilterOpen(!filterOpen);
-    };
-    const [pickVisible, setPickVisible] = useState(false);
-    const openChannelPicker = () => {
-        setPickVisible(true);
-    };
-    const [selectedChannel, setSelectedChannel] = useState(data?.channels[0] || {});
-    const onPickClose = (idx) => {
-        setPickVisible(false);
-        setSelectedChannel(data.channels[idx]);
-        onChannelChange?.(data.channels[idx], idx);
+        LayoutAnimation.configureNext(
+            LayoutAnimation.create(250, 'easeInEaseOut', 'opacity'),
+        );
+        setOpen(!open);
     };
     const [filter, setFilter] = useFilter(data?.filter);
     const onFilterPress = (type) => {
@@ -76,76 +59,78 @@ function Topbar(props) {
     const onLastChange = () => onFilterPress('last');
 
     return (
-        <View style={[css.topbar, cssTopbar]}>
-            <View style={css.body}>
-                {!loaded && (
-                    <>
-                        <ActivityIndicator style={{ marginHorizontal: typo.margin }} />
-                        <Text>{STATUS_TEXT[status]}</Text>
-                    </>
-                )}
-                {loaded && (
-                    <>
-                        <Touchable onPress={openChannelPicker}>
-                            <View style={css.channel}>
-                                <Icon name="list" size={SIZE} color={theme.fontColor} style={{ marginHorizontal: typo.padding }} />
-                                <View style={css.channelTitle}>
-                                    <Text numberOfLines={1} ellipsizeMode="middle" style={{ flexShrink: 1 }}>
-                                        {selectedChannel.text}
-                                    </Text>
-                                    <Badge text={selectedChannel.badge} />
+        <>
+            {open && <Pressable style={css.backdrop} onPress={openFilterMenu} />}
+            <View style={[css.topbar, cssTopbar]}>
+                <View style={css.body}>
+                    {loaded
+                        ? (
+                            <Touchable onPress={onPress} style={C.f1}>
+                                <View style={css.channel}>
+                                    <Icon name="list" size={SIZE} color={theme.fontColor} style={{ marginHorizontal: typo.padding }} />
+                                    <View style={css.channelTitle}>
+                                        <Text numberOfLines={1} ellipsizeMode="middle" style={{ flexShrink: 1 }}>
+                                            {data.channel?.text}
+                                        </Text>
+                                        <Badge text={data.channel?.badge} />
+                                    </View>
                                 </View>
-                            </View>
-                        </Touchable>
-                        <TouchHighlight onPress={openFilterMenu}>
-                            <View style={[css.filter, { paddingHorizontal: typo.padding }]}>
-                                <Icon name={filterOpen ? 'chevron-up-circle' : 'funnel-outline'} size={SIZE} color={theme.fontColor} />
-                            </View>
-                        </TouchHighlight>
-                    </>
+                            </Touchable>
+                        )
+                        : (
+                            <>
+                                <ActivityIndicator style={{ marginHorizontal: typo.margin }} />
+                                <Text style={C.f1}>{STATUS_TEXT[status]}</Text>
+                            </>
+                        )}
+                    <TouchHighlight onPress={openFilterMenu}>
+                        <View style={[css.filter, { paddingHorizontal: typo.padding }]}>
+                            <Icon name={open ? 'chevron-up-circle' : 'funnel-outline'} size={SIZE} color={theme.fontColor} />
+                        </View>
+                    </TouchHighlight>
+                </View>
+
+                {loaded && open && (
+                    <View style={[css.filterBody, { borderColor: theme.borderColor }]}>
+                        <View style={{ flex: 1, paddingVertical: typo.padding }}>
+                            <Text style={[css.filterTitle, cssFilterTitle]}>筛选</Text>
+                            <TopbarCheckboxRow
+                                label="显示摘要"
+                                value={filter.summary}
+                                onChange={onSummaryChange}
+                            />
+                            <TopbarCheckboxRow
+                                label="显示已读"
+                                value={filter.read}
+                                onChange={onReadChange}
+                            />
+                            <TopbarCheckboxRow
+                                label="仅看今天"
+                                value={filter.today}
+                                onChange={onTodayChange}
+                            />
+                        </View>
+                        <View style={{ flex: 1, padding: typo.padding }}>
+                            <Text style={[css.filterTitle, cssFilterTitle]}>排序</Text>
+                            <TopbarCheckboxRow
+                                label="旧的优先"
+                                value={filter.last}
+                                onChange={onLastChange}
+                            />
+                        </View>
+                    </View>
                 )}
             </View>
-            <ModalSelect title="选择RSS源" datalist={data?.channels} visible={pickVisible} onClose={onPickClose} />
-
-            {loaded && filterOpen && (
-                <View style={[css.filterBody, { borderColor: theme.borderColor }]}>
-                    <View style={{ flex: 1, paddingVertical: typo.padding }}>
-                        <Text style={[css.filterTitle, cssFilterTitle]}>筛选</Text>
-                        <Pressable style={css.filterRow} onPress={onSummaryChange}>
-                            <View style={cssCheckbox}>
-                                <Checkbox {...ppCheckbox} value={filter.summary} onValueChange={onSummaryChange} />
-                            </View>
-                            <Text style={css.filterLabel}>显示摘要</Text>
-                        </Pressable>
-                        <Pressable style={css.filterRow} onPress={onReadChange}>
-                            <View style={cssCheckbox}>
-                                <Checkbox {...ppCheckbox} value={filter.read} onValueChange={onReadChange} />
-                            </View>
-                            <Text style={css.filterLabel}>显示已读</Text>
-                        </Pressable>
-                        <Pressable style={css.filterRow} onPress={onTodayChange}>
-                            <View style={cssCheckbox}>
-                                <Checkbox {...ppCheckbox} value={filter.today} onValueChange={onTodayChange} />
-                            </View>
-                            <Text style={css.filterLabel}>仅看今天</Text>
-                        </Pressable>
-                    </View>
-                    <View style={{ flex: 1, padding: typo.padding }}>
-                        <Text style={[css.filterTitle, cssFilterTitle]}>排序</Text>
-                        <Pressable style={css.filterRow} onPress={onLastChange}>
-                            <View style={cssCheckbox}>
-                                <Checkbox {...ppCheckbox} value={filter.last} onValueChange={onLastChange} />
-                            </View>
-                            <Text style={css.filterLabel}>旧的优先</Text>
-                        </Pressable>
-                    </View>
-                </View>
-            )}
-        </View>
+        </>
     );
 }
 
 const css = StyleSheet.create({
+    backdrop: {
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+    },
     topbar: {
         position: 'absolute',
         top: BASE_SPACE,
@@ -178,11 +163,18 @@ const css = StyleSheet.create({
         flexDirection: 'row',
         borderTopWidth: StyleSheet.hairlineWidth,
     },
-    filterRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
 });
 export const TOPBAR_SPACE = 48 + BASE_SPACE * 2;
 
-export default Topbar;
+function areEqual(prevProps, nextProps) {
+    if (
+        prevProps.status !== nextProps.status
+        || prevProps.data.filter !== nextProps.data.filter
+        || prevProps.data.channel !== nextProps.data.channel
+    ) {
+        return false;
+    }
+    return true;
+}
+
+export default React.memo(Topbar, areEqual);

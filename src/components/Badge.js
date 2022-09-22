@@ -16,7 +16,7 @@ export default function Badge(props) {
         backgroundColor: theme.fontColorSecond,
         fontSize: typo.fontSizeSmall,
         color: theme.background,
-        paddingHorizontal: 4,
+        paddingHorizontal: 5,
     };
 
     return (

@@ -1,4 +1,4 @@
-'use strict';
+
 
 import fs from 'react-native-fs';
 import Perf from './Perf.js';
@@ -8,7 +8,7 @@ import Perf from './Perf.js';
  *
  * Written in pure js, only used in react-native, need combined with
  * `react-native-fs`. Focus on files, regardless of permissions
- * 
+ *
  * NOTE: Hermes performance issue with `react-native-fs`, JavaScriptCore works
  * fine, but Hermes costs 100x time when read/writeFile frequently. (Run on
  * Android)
@@ -99,7 +99,7 @@ export async function zar(entries, saveTo, options = ZAR_OPTS) {
 
         /**
          * PERF: frequent open/write file cause performance bottleneck
-         * 
+         *
          * Similar to nodejs filesystem, use `fs.writeFile` has performance issue,
          * the better way is Stream API. (Unavaliable in RN)
          */
@@ -149,12 +149,14 @@ const UNZAR_OPTS = {
 };
 /**
  * Unarchive files from a `.zar`
- * 
+ *
  * @param {string} filePath
  * @param {object} options
  */
 export async function unzar(filePath, options = UNZAR_OPTS) {
-    const { gzip, overwrite, overwritePaths, writePath } = options;
+    const {
+        gzip, overwrite, overwritePaths, writePath,
+    } = options;
     const { size: fileSize } = await fs.stat(filePath);
     const unzarInOne = async (pos) => {
         const h1 = await fs.read(filePath, 512, pos);
@@ -203,7 +205,7 @@ export async function unzar(filePath, options = UNZAR_OPTS) {
 function utf8ToAscii(str) {
     /**
      * ASCII contains 127 characters.
-     * 
+     *
      * In JavaScript, strings is encoded by UTF-16, it means that
      * js cannot present strings which charCode greater than 2^16. Eg:
      * `String.fromCharCode(0) === String.fromCharCode(2**16)`

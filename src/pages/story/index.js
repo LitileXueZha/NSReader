@@ -4,6 +4,10 @@ import {
     StyleSheet,
     FlatList,
     InteractionManager,
+    BackHandler,
+    Alert,
+    Pressable,
+    ToastAndroid,
 } from 'react-native';
 
 import { AppContext } from '../../AppContext.js';
@@ -28,9 +32,12 @@ import Perf from '../../utils/Perf.js';
 import { IDStoryDetail } from '../IDSymbols.js';
 import ScrollToTop, { setScrollTop } from '../../components/ScrollToTop.js';
 import { createPanResponder, AttachFeatures } from './easymode.js';
+import ModalSelect from '../../components/ModalSelect.js';
+import $ev from '../../utils/Event.js';
+import { debounce, throttle } from '../../utils/index.js';
 
 
-const ID_ALL = Symbol('all');
+const initChannels = () => [{ id: 'all', text: '全部', badge: 0 }];
 
 class Story extends Component {
     constructor() {
@@ -48,13 +55,11 @@ class Story extends Component {
                 last: AppSettings.get('story.sort.last'),
             },
             scrollTop: false,
+            visible: false,
         };
         this.scrollRef = React.createRef();
-        this.onScroll = setScrollTop.bind(this);
-        this.channels = [
-            { id: ID_ALL, text: '全部', badge: 0 },
-        ];
-        this.channelId = ID_ALL;
+        this.channels = initChannels();
+        this.channelIdx = 0;
         this.lockScrollEnd = false;
         this.featRef = React.createRef();
         this.panResponder = {};
@@ -64,48 +69,82 @@ class Story extends Component {
     componentDidMount() {
         this.setup();
         this.panResponder = createPanResponder(this.featRef.current);
+        $ev.on('rsschange', this.update);
+        $ev.on('storychange', this.update);
     }
 
+    componentWillUnmount() {
+        $ev.off('rsschange', this.update);
+        $ev.off('storychange', this.update);
+    }
+
+    // eslint-disable-next-line react/sort-comp
     setup = async () => {
         try {
             await MRSS.init();
             await MStory.init();
-            this.stories = MStory.data;
-            this.setupChannels();
-
-            const stories = this.reFilter();
-            this.setState({ stories, status: STATUS_DONE });
+            const storyCached = await MStory.existCache();
+            // Cache cleared or after backup
+            if (!storyCached) {
+                await MRSS.parseLocalStory();
+                BackHandler.addEventListener('hardwareBackPress', this.tasksExitWarning);
+            }
+            this.update();
+            this.setState({ status: STATUS_DONE });
+            setTimeout(() => {
+                this.scrollRef.current.scrollToIndex({
+                    animated: false,
+                    index: 3,
+                    viewOffset: TOPBAR_SPACE,
+                });
+            }, 1000);
         } catch (e) {
             Perf.error(e);
         }
     }
 
+    // eslint-disable-next-line react/sort-comp
+    update = debounce(() => {
+        this.stories = MStory.data;
+        this.setupChannels();
+        const stories = this.filter();
+        this.setState({ stories });
+    })
+
     setupChannels = () => {
         const list = MRSS.countList;
-        this.channels = [].concat(this.channels);
+        this.channels = initChannels();
         for (const item of list) {
-            const { id, title, total } = item;
+            const {
+                id, title, alias, total,
+            } = item;
             this.channels[0].badge += item.total;
-            this.channels.push({ id, text: title, badge: total });
+            this.channels.push({ id, text: alias || title, badge: total });
         }
     }
 
     onRefresh = async () => {
-        this.setState({ refreshing: true });
-        const storyCached = await MStory.existCache();
-        // Cache cleared or after backup
-        if (!storyCached) {
-            await MRSS.init();
-            await MRSS.parseLocalStory();
+        if (this.state.extraData.last) {
+            this.setState({ refreshing: true });
+            await this.load();
+            this.setState({ refreshing: false });
         }
-        setTimeout(() => {
-            this.stories = getRandomStories(500);
-            this.setState({
-                refreshing: false,
-                status: STATUS_DONE,
-                stories: this.stories,
-            });
-        }, 1000);
+    }
+
+    tasksExitWarning = () => {
+        if (MStory._cacheWriting) {
+            Alert.alert('稍等', '后台任务仍在进行中', [{
+                text: '退出',
+                style: 'destructive',
+                onPress: () => {
+                    BackHandler.removeEventListener('hardwareBackPress', this.tasksExitWarning);
+                    BackHandler.exitApp();
+                },
+            }], { cancelable: true });
+            return true;
+        }
+        BackHandler.removeEventListener('hardwareBackPress', this.tasksExitWarning);
+        return false;
     }
 
     sendNotification = () => {
@@ -127,73 +166,99 @@ class Story extends Component {
             this.state.extraData = newExtraData;
             this.setState({
                 extraData: newExtraData,
-                stories: this.reFilter(),
+                stories: this.filter(),
             });
         });
 
         const intValue = +value;
         switch (type) {
             case 'summary':
-                AppSettings.store('story.filter.summary', intValue);
-                break;
             case 'read':
-                AppSettings.store('story.filter.read', intValue);
-                break;
             case 'today':
-                AppSettings.store('story.filter.today', intValue);
+                AppSettings.store(`story.filter.${type}`, intValue);
                 break;
             case 'last':
-                AppSettings.store('story.sort.last', intValue);
+                AppSettings.store(`story.sort.${type}`, intValue);
                 break;
             default:
                 break;
         }
     }
 
-    reFilter = () => {
+    filter = () => {
         const { extraData } = this.state;
-        const showAll = this.channelId === ID_ALL;
+        const showAll = this.channelIdx === 0;
+        const { id } = this.channels[this.channelIdx];
         const channelStories = showAll
             ? this.stories
-            : this.stories.filter((v) => v.pid === this.channelId);
+            : this.stories.filter((v) => v.pid === id);
         const stories = doFilter(channelStories, extraData);
         this.pastId = stories.flagPastId;
 
         return stories;
     }
 
-    onChannelChange = async (channel) => {
-        const { id, badge } = channel;
-        if (id === this.channelId) return;
+    onTopbarPress = () => {
+        this.setState({ visible: true });
+    }
 
-        this.channelId = id;
-        const stories = this.reFilter();
-
-        if (stories.length === 0 && badge > 0) {
-            // Load more
-            return this.onEndReached();
+    onChannelChange = async (index) => {
+        this.setState({ visible: false });
+        if (index === this.channelIdx) {
+            return;
         }
 
-        this.setState({ stories });
+        requestAnimationFrame(() => {
+            this.channelIdx = index;
+            const stories = this.filter();
+            const { badge: total } = this.channels[index];
+
+            if (stories.length === 0 && total > 0) {
+                // Load more
+                this.load();
+            }
+            this.setState({ stories });
+        });
     }
 
     onEndReached = async (info) => {
+        if (!this.state.extraData.last) {
+            this.load();
+        }
+    }
+
+    load = async () => {
         if (!MStory.more || this.lockScrollEnd) return;
 
-        const { id } = this.stories[this.stories.length - 1];
         // Add a lock for unexpected onEndReached event fired by setState() or bounce
         this.lockScrollEnd = true;
         try {
+            const { id } = this.stories[this.stories.length - 1];
+
             await MStory.load(id);
             this.stories = MStory.data;
 
-            const stories = this.reFilter();
+            const stories = this.filter();
+            const fixedLastOfCurrentIndex = stories.length - this.state.stories.length;
             // Progressive display
             this.setState({ stories });
             this.lockScrollEnd = false;
+            const { badge: total } = this.channels[this.channelIdx];
             // Not enough items in one screen, load more
-            if (stories.length < 10) {
-                return this.onEndReached();
+            if (stories.length < 10 && stories.length < total) {
+                requestAnimationFrame(this.load);
+                return;
+                // return this.onEndReached();
+            }
+
+            // When older stories are list on the top, we need to show the current
+            // instead of the top
+            if (this.state.extraData.last && fixedLastOfCurrentIndex > 0) {
+                this.scrollRef.current.scrollToIndex({
+                    animated: false,
+                    index: fixedLastOfCurrentIndex,
+                    viewOffset: 20,
+                });
             }
         } catch (e) {
             this.lockScrollEnd = false;
@@ -201,9 +266,29 @@ class Story extends Component {
         }
     }
 
+    onTopReached = () => {
+        if (this.state.extraData.last) {
+            console.log('update lastID');
+        }
+    };
+
+    topReachedScroll = throttle((y, vy) => {
+        if (vy < 0 && y < 50) {
+            this.onTopReached();
+        }
+    });
+
     onStoryPress = (item) => {
         const { id } = item;
         goto(IDStoryDetail, { id });
+    }
+
+    onScroll = (e) => {
+        const { contentOffset, velocity } = e.nativeEvent;
+        const { y } = contentOffset;
+
+        this.topReachedScroll(y)(y, velocity.y);
+        setScrollTop.call(this, e);
     }
 
     onScrollTop = () => {
@@ -234,7 +319,15 @@ class Story extends Component {
 
     render() {
         const { theme, typo } = this.context;
-        const { status, refreshing, stories, extraData, scrollTop } = this.state;
+        const footerStyle = {
+            paddingVertical: typo.margin * 2,
+            fontSize: typo.fontSizeSmall,
+            color: theme.fontColorSecond,
+            textAlign: 'center',
+        };
+        const {
+            status, refreshing, stories, extraData, scrollTop, visible,
+        } = this.state;
 
         return (
             <>
@@ -250,19 +343,26 @@ class Story extends Component {
                     onEndReached={this.onEndReached}
                     contentContainerStyle={[css.list, stories.length === 0 && { flex: 1 }]}
                     ListFooterComponent={stories.length > 0 && (
-                        <View style={{ marginVertical: typo.margin * 2 }}>
-                            <Text style={{ fontSize: typo.fontSizeSmall, textAlign: 'center' }} secondary>
-                                {MStory.more ? `上拉读取更多\n${this.stories.length}/${this.channels[0].badge}` : '结尾了'}
-                            </Text>
-                        </View>
+                        extraData.last ? (
+                            <Text style={footerStyle}>结尾了</Text>
+                        ) : (
+                            <Pressable onPress={this.load}>
+                                <Text style={footerStyle}>
+                                    {MStory.more ? `正在读取更多\n${this.stories.length}/${this.channels[0].badge}` : '结尾了'}
+                                </Text>
+                            </Pressable>
+                        )
                     )}
                     ListEmptyComponent={(
                         <Empty
                             style={{ position: 'relative', top: -typo.padding }}
                             more={(
                                 <>
-                                    <Text style={{ marginTop: typo.margin }}>试试下拉刷新</Text>
-                                    <Text>或者<Link to="rss">去添加一个RSS源</Link></Text>
+                                    <Text>{'\n试试下拉刷新'}</Text>
+                                    <Text>
+                                        或者
+                                        <Link to="rss">去添加一个RSS源</Link>
+                                    </Text>
                                 </>
                             )}
                         />
@@ -280,10 +380,17 @@ class Story extends Component {
                 />
                 <Topbar
                     status={status}
-                    data={{ filter: extraData, channels: this.channels }}
+                    data={{ filter: extraData, channel: this.channels[this.channelIdx] }}
                     onFilter={this.onFilter}
-                    onChannelChange={this.onChannelChange}
+                    onPress={this.onTopbarPress}
                 />
+                <ModalSelect
+                    title="选择RSS源"
+                    datalist={this.channels}
+                    visible={visible}
+                    onClose={this.onChannelChange}
+                />
+
                 <ScrollToTop visible={scrollTop} onPress={this.onScrollTop} />
                 <AttachFeatures ref={this.featRef} />
             </>
