@@ -53,7 +53,7 @@ export default class RSSAdd extends Component {
 
     onURLInput = (text) => {
         this.URL = text.trim();
-    }
+    };
 
     onSave = async () => {
         if (this.task) {
@@ -99,7 +99,7 @@ export default class RSSAdd extends Component {
             this.logRef.current.write('OK');
             this.resolveRSS();
         }
-    }
+    };
 
     resolveRSS = async () => {
         this.logRef.current.write('解析源文件格式', true);
@@ -135,7 +135,7 @@ export default class RSSAdd extends Component {
         }
         this.logRef.current.write('失败');
         this.showResult({ success: false, support: true });
-    }
+    };
 
     save = (data) => {
         MRSS.create(this.URL, data)
@@ -149,16 +149,16 @@ export default class RSSAdd extends Component {
                 this.showResult({ success: false });
                 Perf.error(e);
             });
-    }
+    };
 
     showResult = (result) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         this.setState({ result });
-    }
+    };
 
     onDetailPress = () => {
         Alert.alert(null, this.error);
-    }
+    };
 
     render() {
         const { theme, typo } = this.context;

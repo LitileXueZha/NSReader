@@ -37,6 +37,7 @@ export default function SettingItem(props) {
         borderColor: theme.borderColor,
         borderBottomWidth: StyleSheet.hairlineWidth,
     };
+    const space = typo.margin + typo.padding / 2;
     const onItemPress = () => {
         if (type === 'checkbox') {
             setChecked(!checked);
@@ -46,7 +47,7 @@ export default function SettingItem(props) {
 
     return (
         <Touchable onPress={onItemPress} disabled={disableTouchEffect}>
-            <View style={{ paddingLeft: typo.margin + 4 }}>
+            <View style={{ paddingLeft: space }}>
                 <View style={[css.row, { paddingVertical: typo.padding }, style, borderStyle]}>
                     <View style={css.body}>
                         <Text>{text}</Text>
@@ -56,7 +57,7 @@ export default function SettingItem(props) {
                             </Text>
                         )}
                     </View>
-                    <View style={[css.action, { marginHorizontal: typo.margin + 4 }]} pointerEvents="none">
+                    <View style={[css.action, { marginHorizontal: space }]} pointerEvents="none">
                         {loading && <ActivityIndicator style={css.icLoad} />}
                         {value && (
                             <Text style={{ color: theme.fontColorSecond, marginRight: 2 }}>{value}</Text>

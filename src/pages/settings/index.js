@@ -33,28 +33,27 @@ class Settings extends Component {
 
     onThemeOpen = () => {
         this.setState({ theme: true });
-    }
+    };
 
     onThemeClose = (index) => {
         this.setState({
             theme: false,
             themeName: THEME_LIST[index].text,
         });
-    }
+    };
 
     onEasymodeChange = (value) => {
-        Alert.alert('注意', '重启后生效', [{
-            text: '稍后',
-        }, {
-            text: '立即退出',
-            onPress: () => BackHandler.exitApp(),
-        }], { cancelable: true });
+        if (value) {
+            Alert.alert('使用手势提示', '向左滑动后显示"RSS源"和"设置"选项。重启后生效', [{
+                text: '我知道了',
+            }], { cancelable: true });
+        }
         aps.store('settings.easymode', +value);
-    }
+    };
 
-    goMore = () => goto(IDSettingsMore)
+    goMore = () => goto(IDSettingsMore);
 
-    goAbout = () => goto(IDAbout)
+    goAbout = () => goto(IDAbout);
 
     render() {
         const { theme, typo } = this.context;
@@ -72,7 +71,7 @@ class Settings extends Component {
             <>
                 {this.easymode && <Navbar title="设置" />}
                 <ScrollView style={{ flex: 1, backgroundColor: theme.bgPaperInset }}>
-                    <View style={[css.head, { backgroundColor: theme.background, padding: typo.padding }]}>
+                    <View style={[css.head, { backgroundColor: theme.background }]}>
                         <View style={[css.logo, { backgroundColor: theme.primaryColor }]}>
                             <Text style={css.logoText}>₯</Text>
                         </View>
@@ -108,7 +107,6 @@ class Settings extends Component {
                             onPress={this.onEasymodeChange}
                         />
                         <SettingItem
-                            type="link"
                             text="更多设置"
                             tips="更复杂的配置，如果不熟悉的话不建议修改这些"
                             borderless
@@ -117,7 +115,6 @@ class Settings extends Component {
                     </View>
                     <View style={[sectionStyle, { marginTop: typo.margin }]}>
                         <SettingItem
-                            type="link"
                             text="关于"
                             borderless
                             onPress={this.goAbout}
@@ -141,6 +138,7 @@ const css = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
+        paddingVertical: 20,
     },
     logo: {
         marginLeft: 4,

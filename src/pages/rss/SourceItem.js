@@ -53,7 +53,7 @@ function SourceItem(props) {
                             )}
                         </View>
                     </View>
-                    <Favicon id={data.id} size={48} radius={4} />
+                    <Favicon id={data.id} size={48} radius={6} />
                 </View>
                 <Text style={[disabledStyle, memoStyles.desc]} numberOfLines={3}>
                     {data.description}
@@ -83,7 +83,8 @@ const css = StyleSheet.create({
     },
     badge: {
         marginLeft: 8,
-        borderRadius: 2,
+        marginTop: 2,
+        borderRadius: 4,
         padding: 2,
         paddingHorizontal: 4,
     },

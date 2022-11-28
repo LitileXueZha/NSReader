@@ -54,7 +54,7 @@ export default class App extends React.Component {
         // FIXME: Update the settings page first
         this.setState({ theme: themes[id] });
         Navigation.mergeOptions(this.props.componentId, getComponentOptions());
-    }
+    };
 
     render() {
         Perf.log('<App/> render');

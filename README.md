@@ -13,6 +13,7 @@ Technology support:
 |-|-|-|-|
 |React Native`0.66`|5.0+ (API 21)|11.0+ (iPhone 8)|>94.1% / >98%|
 |Flutter`2.5`|4.4+ (API 19)|9.0+ (iPhone 6s)|>98.1% / >98%|
+|Apache Cordova`11`|5.1+ (API 22)|11.0+ (iPhone 6s)|>92.3% / >98%|
 
 See [Android Studio](https://www.xda-developers.com/android-version-distribution-statistics-android-studio/) and [Apple Support](https://developer.apple.com/support/app-store/).
 
@@ -41,12 +42,12 @@ app root directory
 ├─cache
 │  ├─images
 │  ├─story
-│  │  ├─jsond
+│  │  ├─jsond          # Removed, SQLite3 instead
 │  │  │  ├─ts+id-001
 │  │  │  ├─ts+id-002
 │  │  │  ├─ts+id-003
 │  │  │  ├─...
-│  │  ├─html
+│  │  ├─html           # Removed, SQLite3 instead
 │  │  │  ├─id-001.html
 │  │  │  ├─...
 │  │  ├─0

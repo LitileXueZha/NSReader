@@ -43,12 +43,7 @@ class RSS extends Component {
     }
 
     componentDidMount() {
-        // setTimeout(() => {
-        //     this.setState({ sources: getRandomSources(20) });
-        // }, 1000);
-        if (!MRSS.initialized) {
-            MRSS.init().then(this.update);
-        }
+        MRSS.init().then(this.update);
         $ev.on('rsschange', this.update);
     }
 
@@ -67,7 +62,7 @@ class RSS extends Component {
         await MRSS.fetchAll();
         this.update();
         this.setState({ refreshing: false });
-    }
+    };
 
     onSourceAdd = () => {
         goto(IDRSSAdd);
@@ -76,13 +71,13 @@ class RSS extends Component {
     onSourcePress = (item) => {
         const { id } = item;
         goto(IDRSSDetail, { id });
-    }
+    };
 
     onToggleEnabled = (item, index) => {
-        const { title, enabled } = item;
+        const { title, alias, enabled } = item;
         const message = enabled ? '关闭此 RSS 源内容更新' : '启用更新';
 
-        Alert.alert(title, message, [{
+        Alert.alert(alias || title, message, [{
             text: !enabled ? '好的' : '确认',
             onPress: () => {
                 const sources = this.state.sources.map((value, i) => {
@@ -99,11 +94,11 @@ class RSS extends Component {
             text: '取消',
             style: 'cancel',
         }], { cancelable: true });
-    }
+    };
 
     onTutorialPress = () => {
         Alert.alert('TODO', 'Somethings...');
-    }
+    };
 
     renderItem = ({ item, index }) => (
         <SourceItem
@@ -112,7 +107,7 @@ class RSS extends Component {
             onPress={() => this.onSourcePress(item)}
             onToggleEnabled={() => this.onToggleEnabled(item, index)}
         />
-    )
+    );
 
     render() {
         const { theme, typo } = this.context;

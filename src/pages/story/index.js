@@ -9,6 +9,7 @@ import {
     Pressable,
     ToastAndroid,
 } from 'react-native';
+import WebView from 'react-native-webview';
 
 import { AppContext } from '../../AppContext.js';
 import { BASE_SPACE } from '../../themes/typography.js';
@@ -35,6 +36,7 @@ import { createPanResponder, AttachFeatures } from './easymode.js';
 import ModalSelect from '../../components/ModalSelect.js';
 import $ev from '../../utils/Event.js';
 import { debounce, throttle } from '../../utils/index.js';
+import C from '../../components/globalCSSStyles.js';
 
 
 const initChannels = () => [{ id: 'all', text: '全部', badge: 0 }];
@@ -43,8 +45,9 @@ class Story extends Component {
     constructor() {
         super();
         this.stories = MStory.data;
+        this.endOfStory = !MStory.more;
         this.state = {
-            status: MStory.initialized ? STATUS_DONE : STATUS_LOADING,
+            status: STATUS_LOADING,
             // status: STATUS_DONE,
             refreshing: false,
             stories: [],
@@ -78,19 +81,19 @@ class Story extends Component {
         $ev.off('storychange', this.update);
     }
 
-    // eslint-disable-next-line react/sort-comp
     setup = async () => {
         try {
             await MRSS.init();
             await MStory.init();
             const storyCached = await MStory.existCache();
             // Cache cleared or after backup
-            if (!storyCached) {
+            if (!storyCached && !MStory._cacheWriting) {
                 await MRSS.parseLocalStory();
                 BackHandler.addEventListener('hardwareBackPress', this.tasksExitWarning);
             }
-            this.update();
-            this.setState({ status: STATUS_DONE });
+            this.stories = MStory.data;
+            this.setupChannels();
+            this.setState({ status: STATUS_DONE, stories: this.filter() });
             setTimeout(() => {
                 this.scrollRef.current.scrollToIndex({
                     animated: false,
@@ -101,15 +104,17 @@ class Story extends Component {
         } catch (e) {
             Perf.error(e);
         }
-    }
+    };
 
     // eslint-disable-next-line react/sort-comp
     update = debounce(() => {
+        // Only show all stories will update really when received news
+        if (this.channelIdx !== 0) return;
         this.stories = MStory.data;
         this.setupChannels();
         const stories = this.filter();
         this.setState({ stories });
-    })
+    });
 
     setupChannels = () => {
         const list = MRSS.countList;
@@ -121,7 +126,7 @@ class Story extends Component {
             this.channels[0].badge += item.total;
             this.channels.push({ id, text: alias || title, badge: total });
         }
-    }
+    };
 
     onRefresh = async () => {
         if (this.state.extraData.last) {
@@ -129,7 +134,7 @@ class Story extends Component {
             await this.load();
             this.setState({ refreshing: false });
         }
-    }
+    };
 
     tasksExitWarning = () => {
         if (MStory._cacheWriting) {
@@ -145,7 +150,7 @@ class Story extends Component {
         }
         BackHandler.removeEventListener('hardwareBackPress', this.tasksExitWarning);
         return false;
-    }
+    };
 
     sendNotification = () => {
         new Notification('新消息来了', {
@@ -183,73 +188,74 @@ class Story extends Component {
             default:
                 break;
         }
-    }
+    };
 
     filter = () => {
         const { extraData } = this.state;
-        const showAll = this.channelIdx === 0;
-        const { id } = this.channels[this.channelIdx];
-        const channelStories = showAll
-            ? this.stories
-            : this.stories.filter((v) => v.pid === id);
-        const stories = doFilter(channelStories, extraData);
+        const stories = doFilter(this.stories, extraData);
         this.pastId = stories.flagPastId;
 
         return stories;
-    }
+    };
 
     onTopbarPress = () => {
         this.setState({ visible: true });
-    }
+    };
 
-    onChannelChange = async (index) => {
-        this.setState({ visible: false });
-        if (index === this.channelIdx) {
-            return;
-        }
-
-        requestAnimationFrame(() => {
-            this.channelIdx = index;
-            const stories = this.filter();
-            const { badge: total } = this.channels[index];
-
-            if (stories.length === 0 && total > 0) {
-                // Load more
-                this.load();
+    onChannelChange = (index) => {
+        this.setState({ visible: false }, async () => {
+            if (index === this.channelIdx) {
+                return;
             }
+            this.channelIdx = index;
+            if (index === 0) {
+                // Show all stories, use the StoryList
+                this.stories = MStory.data;
+                this.endOfStory = !MStory.more;
+            } else {
+                const { id, badge: total } = this.channels[index];
+                // Always load newest
+                const startDate = MStory.data[0].date;
+                this.stories = await MStory.loadByPid(id, startDate);
+                this.endOfStory = this.stories.length === total;
+            }
+
+            const stories = this.filter();
             this.setState({ stories });
         });
-    }
+    };
 
     onEndReached = async (info) => {
         if (!this.state.extraData.last) {
             this.load();
         }
-    }
+    };
 
     load = async () => {
-        if (!MStory.more || this.lockScrollEnd) return;
+        if (this.endOfStory || this.lockScrollEnd) return;
 
         // Add a lock for unexpected onEndReached event fired by setState() or bounce
         this.lockScrollEnd = true;
         try {
-            const { id } = this.stories[this.stories.length - 1];
+            const { id, date } = this.stories[this.stories.length - 1];
 
-            await MStory.load(id);
-            this.stories = MStory.data;
+            if (this.channelIdx === 0) {
+                await MStory.load(id, date);
+                this.stories = MStory.data;
+                this.endOfStory = !MStory.more;
+            } else {
+                const { id: pid, badge: total } = this.channels[this.channelIdx];
+                const result = await MStory.loadByPid(pid, date, id);
+                // Append more stories
+                this.stories = this.stories.concat(result);
+                this.endOfStory = this.stories.length === total;
+            }
 
             const stories = this.filter();
             const fixedLastOfCurrentIndex = stories.length - this.state.stories.length;
             // Progressive display
             this.setState({ stories });
             this.lockScrollEnd = false;
-            const { badge: total } = this.channels[this.channelIdx];
-            // Not enough items in one screen, load more
-            if (stories.length < 10 && stories.length < total) {
-                requestAnimationFrame(this.load);
-                return;
-                // return this.onEndReached();
-            }
 
             // When older stories are list on the top, we need to show the current
             // instead of the top
@@ -264,7 +270,7 @@ class Story extends Component {
             this.lockScrollEnd = false;
             Perf.error(e);
         }
-    }
+    };
 
     onTopReached = () => {
         if (this.state.extraData.last) {
@@ -279,9 +285,8 @@ class Story extends Component {
     });
 
     onStoryPress = (item) => {
-        const { id } = item;
-        goto(IDStoryDetail, { id });
-    }
+        goto(IDStoryDetail, { item });
+    };
 
     onScroll = (e) => {
         const { contentOffset, velocity } = e.nativeEvent;
@@ -289,21 +294,21 @@ class Story extends Component {
 
         this.topReachedScroll(y)(y, velocity.y);
         setScrollTop.call(this, e);
-    }
+    };
 
     onScrollTop = () => {
         this.scrollRef.current.scrollToOffset({ offset: 0 });
-    }
+    };
 
     renderItem = ({ item, index }) => {
-        const { extraData } = this.state;
-        let flagIndex = index > 0 && index % 20 === 0 && index;
+        const { extraData, stories } = this.state;
+        let flagIndex;
         // pastId is added in `doFilter`
         let flagPast = item.id === this.pastId;
         if (index === 0 && flagPast) {
             flagPast = false;
         } else if ((index > 0 && index % 20 === 0) || flagPast) {
-            flagIndex = index;
+            flagIndex = extraData.last ? stories.length - index : index;
         }
         return (
             <StoryItem
@@ -328,6 +333,7 @@ class Story extends Component {
         const {
             status, refreshing, stories, extraData, scrollTop, visible,
         } = this.state;
+        const channel = this.channels[this.channelIdx];
 
         return (
             <>
@@ -348,7 +354,7 @@ class Story extends Component {
                         ) : (
                             <Pressable onPress={this.load}>
                                 <Text style={footerStyle}>
-                                    {MStory.more ? `正在读取更多\n${this.stories.length}/${this.channels[0].badge}` : '结尾了'}
+                                    {this.endOfStory ? '结尾了' : `正在读取更多\n${this.stories.length}/${channel.badge}`}
                                 </Text>
                             </Pressable>
                         )
@@ -380,7 +386,7 @@ class Story extends Component {
                 />
                 <Topbar
                     status={status}
-                    data={{ filter: extraData, channel: this.channels[this.channelIdx] }}
+                    data={{ filter: extraData, channel }}
                     onFilter={this.onFilter}
                     onPress={this.onTopbarPress}
                 />
@@ -393,6 +399,9 @@ class Story extends Component {
 
                 <ScrollToTop visible={scrollTop} onPress={this.onScrollTop} />
                 <AttachFeatures ref={this.featRef} />
+
+                {/* Pre-load webview instance, for quicker response in detail page */}
+                {stories.length > 0 && <WebView style={C.hidden} source={{ html: 'a' }} />}
             </>
         );
     }

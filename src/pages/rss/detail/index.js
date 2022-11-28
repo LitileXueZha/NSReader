@@ -87,26 +87,26 @@ class RSSDetail extends Component {
             default:
                 break;
         }
-    }
+    };
 
     onSave = async () => {
         if (Object.values(this.data).length > 0) {
             await MRSS.update(this.source.id, this.data);
             this.data = {};
         }
-    }
+    };
 
     onAliasChange = (text) => {
         this.data.alias = text;
-    }
+    };
 
     onEnabledChange = (value) => {
         this.data.enabled = +value;
-    }
+    };
 
     onDailyChange = (value) => {
         this.data.daily = +value;
-    }
+    };
 
     onRefresh = async () => {
         if (this.source?.id) {
@@ -119,7 +119,7 @@ class RSSDetail extends Component {
                 Perf.error(e);
             }
         }
-    }
+    };
 
     render() {
         const { theme, typo } = this.context;
@@ -238,7 +238,7 @@ const css = StyleSheet.create({
         paddingHorizontal: 8,
         marginBottom: 16,
         marginLeft: 20,
-        borderRadius: 4,
+        borderRadius: 6,
     },
     corner: {
         position: 'absolute',

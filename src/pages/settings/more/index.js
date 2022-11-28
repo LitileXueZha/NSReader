@@ -84,7 +84,7 @@ class SettingsMore extends Component {
         } finally {
             this.setState({ baking: false });
         }
-    }
+    };
 
     onRecovery = async () => {
         this.setState({ recing: true });
@@ -115,13 +115,13 @@ class SettingsMore extends Component {
         } finally {
             this.setState({ recing: false });
         }
-    }
+    };
 
-    goStorage = () => goto(IDStorage)
+    goStorage = () => goto(IDStorage);
 
-    goExperiment = () => goto(IDExperiment)
+    goExperiment = () => goto(IDExperiment);
 
-    goSystemSettings = () => Linking.openSettings()
+    goSystemSettings = () => Linking.openSettings();
 
     render() {
         const { theme, typo } = this.context;
@@ -137,7 +137,6 @@ class SettingsMore extends Component {
                 <ScrollView style={{ flex: 1, backgroundColor: theme.bgPaperInset }}>
                     <View style={sectionStyle}>
                         <SettingItem
-                            type="link"
                             text="存储"
                             tips="管理数据文件"
                             onPress={this.goStorage}
@@ -179,7 +178,6 @@ class SettingsMore extends Component {
                     )}
                     <View style={sectionStyle}>
                         <SettingItem
-                            type="link"
                             text="实验性功能"
                             borderless
                             onPress={this.goExperiment}

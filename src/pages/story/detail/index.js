@@ -43,7 +43,7 @@ class StoryDetail extends Component {
             scrollTop: false,
         };
         this.onScroll = setScrollTop.bind(this);
-        this.data = MStory.data.find((v) => v.id === props.route?.id);
+        this.data = props.route?.item;
         this.rss = MRSS.data[this.data?.pid];
         this.MENUS = [{
             id: 'share',
@@ -79,11 +79,11 @@ class StoryDetail extends Component {
         const html = tpl.replace(KEY_CSS, themeCSS).replace(KEY, storySanitized);
 
         this.setState({ html });
-    }
+    };
 
     onLoadEnd = () => {
         Perf.info('WebView loadEnd');
-    }
+    };
 
     onMessage = (ev) => {
         const { data } = ev.nativeEvent;
@@ -91,7 +91,7 @@ class StoryDetail extends Component {
             const { height } = JSON.parse(data);
             this.setState({ height });
         } catch (e) {}
-    }
+    };
 
     onShouldStartLoadWithRequest = (req) => {
         const { url } = req;
@@ -99,11 +99,11 @@ class StoryDetail extends Component {
             openLink(url);
         }
         return false;
-    }
+    };
 
     onScrollTop = () => {
         this.scrollRef.current.scrollTo({ y: 0 });
-    }
+    };
 
     onMenuPress = (index) => {
         const { title, link } = this.data;
@@ -124,7 +124,7 @@ class StoryDetail extends Component {
             default:
                 break;
         }
-    }
+    };
 
     render() {
         const { theme, typo } = this.context;

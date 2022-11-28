@@ -18,6 +18,9 @@ const C = StyleSheet.create({
     fs12: {
         fontSize: 12,
     },
+    hidden: {
+        display: 'none',
+    },
 });
 const flex = StyleSheet.create({
     row: {

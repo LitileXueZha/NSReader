@@ -82,7 +82,7 @@ class Storage extends Component {
         FastImage.clearDiskCache();
         await MStory.clearDisk();
         this.setState({ cache: 0 });
-    }
+    };
 
     onDataClear = () => {
         Alert.alert(
@@ -101,7 +101,7 @@ class Storage extends Component {
             }],
             { cancelable: true },
         );
-    }
+    };
 
     render() {
         const { theme, typo } = this.context;
@@ -127,8 +127,7 @@ class Storage extends Component {
                             <Text>空间</Text>
                             <View style={{ alignItems: 'flex-end' }}>
                                 <Text secondary>
-                                    可用 {fsInfo.free} /
-                                    总计 {fsInfo.total}
+                                    {`可用 ${fsInfo.free} / 总计 ${fsInfo.total}`}
                                 </Text>
                                 <View style={[css.bar, { backgroundColor: theme.bgPaperInset }]}>
                                     <View style={progressStyle} />

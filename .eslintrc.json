@@ -1,6 +1,6 @@
 {
     "root": true,
-    "parser": "babel-eslint",
+    "parser": "@babel/eslint-parser",
     "env": {
         "es2021": true
     },
@@ -24,12 +24,13 @@
     },
     "rules": {
         "indent": ["error", 4, {"SwitchCase":1}],
-        "linebreak-style": ["error", "windows"],
         "no-restricted-syntax": "off",
         "no-use-before-define": ["error", {"functions": false}],
         "no-new": "off",
         "no-underscore-dangle": "off",
         "no-multiple-empty-lines": ["error", {"max": 2}],
+        "guard-for-in": "off",
+        "no-plusplus": "off",
         "react/jsx-filename-extension": "off",
         "react/jsx-indent": ["error", 4],
         "react/jsx-indent-props": ["error", 4],
@@ -38,6 +39,7 @@
         "react/jsx-props-no-spreading": "warn",
         "react/no-unused-state": "off",
         "import/extensions": ["warn", "ignorePackages"],
+        "import/prefer-default-export": "off",
         "import/no-extraneous-dependencies": ["off", {"packageDir": ["./", "../"]}],
         "jsx-a11y/anchor-is-valid": "off"
     }

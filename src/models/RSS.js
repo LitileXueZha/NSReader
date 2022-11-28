@@ -229,7 +229,7 @@ class RSSSource {
         const list = Object.values(this.data);
         const fnMap = (item) => {
             const { id, title, alias } = item;
-            const total = MStory._ids[id]?.list.length || 0;
+            const total = MStory.ids[id]?.list || 0;
 
             return { id, title: alias || title, total };
         };

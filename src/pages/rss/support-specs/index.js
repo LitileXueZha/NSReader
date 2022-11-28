@@ -67,7 +67,7 @@ class SupportSpecs extends Component {
             return 'caret-down';
         }
         return 'caret-forward';
-    }
+    };
 
     render() {
         const { theme, typo } = this.context;

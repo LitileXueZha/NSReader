@@ -1,6 +1,9 @@
+// eslint-disable-next-line import/order
 import Perf from './utils/Perf.js';
 import React from 'react';
-import { AppRegistry, Platform, UIManager, LogBox } from 'react-native';
+import {
+    AppRegistry, Platform, UIManager, LogBox,
+} from 'react-native';
 import { Navigation } from 'react-native-navigation';
 
 import registerRoutes from './routes.js';

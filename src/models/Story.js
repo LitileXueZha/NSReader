@@ -5,6 +5,9 @@ import { nanoid } from 'nanoid/non-secure';
 import Perf from '../utils/Perf.js';
 import { insertStoryTo } from './Story.util.js';
 import $ev from '../utils/Event.js';
+import {
+    deleteAllData, deleteData, initDB, insertData, readData, readHtml, updateData,
+} from './Story.db.js';
 
 const SL_DIR = `${fs.CachesDirectoryPath}/story`;
 const SL_DIR_JSOND = `${SL_DIR}/jsond`;
@@ -26,7 +29,7 @@ class StoryList {
         this.data = [];
         this.initialized = false;
         this.more = true;
-        this._ids = {};
+        this.ids = {};
         this._cacheQueue = [];
         this._cacheWriting = false;
     }
@@ -44,12 +47,11 @@ class StoryList {
             const [rawData, rawIds] = results;
 
             this.data = JSON.parse(rawData);
-            this._ids = JSON.parse(rawIds);
+            this.ids = JSON.parse(rawIds);
             this.more = this.data.length >= MAX;
         } catch (e) {
-            // await fs.mkdir(SL_DIR);
-            await fs.mkdir(SL_DIR_HTML);
-            await fs.mkdir(SL_DIR_JSOND);
+            Perf.error(e);
+            await fs.mkdir(SL_DIR);
         }
         Perf.info('StoryList initialized');
     }
@@ -62,18 +64,19 @@ class StoryList {
      * @param {Date} mtime
      */
     async append(list, rss, mtime) {
-        await this.init();
         if (list.length === 0) {
             return;
         }
+        await this.init();
+        await initDB();
         const pid = rss.id;
-        if (!this._ids[pid]) {
-            this._ids[pid] = {
+        if (!this.ids[pid]) {
+            this.ids[pid] = {
                 latest: [],
-                list: [],
+                list: 0,
             };
         }
-        const { latest } = this._ids[pid];
+        const { latest } = this.ids[pid];
         // Only the stories which has title and description will be saved
         const usedList = list.filter((v) => v && v.title && v.description);
         const newStories = [];
@@ -119,13 +122,14 @@ class StoryList {
                     storyItem.link = storyItem.link[0];
                 }
                 newStories.push(storyItem);
-                this._ids[pid].list.push(id);
-                this._cacheQueue.push(createWriteTask(`${SL_DIR_JSOND}/${ts}${id}`, storyItem));
-                this._cacheQueue.push(createWriteTask(`${SL_DIR_HTML}/${id}.html`, description));
+                latest.push(item.title);
+                this.ids[pid].list += 1;
+                this._cacheQueue.push(createInsertTask('jsond', storyItem));
+                this._cacheQueue.push(createInsertTask('html', { pid: id, data: description }));
             }
         }
         if (newStories.length > 0) {
-            this._ids[pid].latest = usedList.map((item) => item.title);
+            this.ids[pid].latest = usedList.map((item) => item.title);
             const sortStories = newStories.sort((a, b) => b.date - a.date);
             let insertedData = insertStoryTo(sortStories, this.data);
             const lastItem = this.data[this.data.length - 1];
@@ -138,7 +142,7 @@ class StoryList {
                 }
             }
             this.data = insertedData;
-            this._cacheQueue.push(createWriteTask(SL_IDS, this._ids));
+            this._cacheQueue.push(createWriteTask(SL_IDS, this.ids));
             this._cacheQueue.push(createWriteTask(ZERO, this.data.slice(0, MAX)));
             this.mkCache();
             $ev.emit('storychange');
@@ -154,9 +158,9 @@ class StoryList {
     update(id, data = {}) {
         const index = this.data.findIndex((v) => v.id === id);
         if (index > -1) {
-            const updateData = { ...this.data[index], ...data };
-            this.data[index] = updateData;
-            this._cacheQueue.push(createWriteTask(`${SL_DIR_JSOND}/${updateData.date}${id}`, updateData));
+            const item = { ...this.data[index], ...data };
+            this.data[index] = item;
+            initDB().then(() => updateData(id, data));
             if (index < MAX) {
                 this._cacheQueue.push(createWriteTask(ZERO, this.data.slice(0, MAX)));
             }
@@ -171,21 +175,14 @@ class StoryList {
      */
     async delete(pid) {
         this.data = this.data.filter((v) => v.pid !== pid);
-        const deleteItem = this._ids[pid];
-        delete this._ids[pid];
-        this._cacheQueue.push(createWriteTask(SL_IDS, this._ids));
+        const deleteItem = this.ids[pid];
+        delete this.ids[pid];
+        this._cacheQueue.push(createWriteTask(SL_IDS, this.ids));
         this._cacheQueue.push(createWriteTask(ZERO, this.data.slice(0, MAX)));
         this.mkCache();
         $ev.emit('storychange');
         if (deleteItem) {
-            const ids = deleteItem.list;
-            const dirs = await fs.readDir(SL_DIR_JSOND);
-            for (const file of dirs) {
-                const id = file.name.substring(13); // 13 is timestamp length
-                if (ids.indexOf(id) > -1) {
-                    fs.unlink(file.path).catch(Perf.error);
-                }
-            }
+            initDB().then(() => deleteData(pid));
         }
     }
 
@@ -193,9 +190,23 @@ class StoryList {
      * Load a part of stories
      *
      * @param {string} nextId
+     * @param {number} date
      * @param {number} size
      */
-    async load(nextId, size = MAX) {
+    async load(nextId, date, size = MAX) {
+        if (!this.more) return;
+
+        Perf.start();
+        await initDB();
+        const result = await readData(date, size, null);
+        if (result.length < size) {
+            this.more = false;
+        }
+        this.data = this.data.concat(this._deduplicate(result, nextId));
+        Perf.info('StoryList load more');
+    }
+    // eslint-disable-next-line lines-between-class-members
+    async _deprecatedLoad(nextId, size = MAX) {
         if (!this.more) return;
 
         Perf.start();
@@ -237,8 +248,26 @@ class StoryList {
         }
     }
 
-    loadHtml(id) {
-        return fs.readFile(`${SL_DIR_HTML}/${id}.html`);
+    async loadByPid(pid, date, nextId = '', size = MAX) {
+        await initDB();
+        const result = await readData(date, size, {
+            where: 'pid=?',
+            params: [pid],
+        });
+        return this._deduplicate(result, nextId);
+    }
+
+    _deduplicate(result, nextId) {
+        if (nextId) {
+            const duplicateIndex = result.findIndex((v) => v.id === nextId);
+            return result.slice(duplicateIndex + 1);
+        }
+        return result;
+    }
+
+    async loadHtml(id) {
+        await initDB();
+        return readHtml(id);
     }
 
     /**
@@ -246,6 +275,10 @@ class StoryList {
      *
      * Write a file costs ≈5ms
      * Write 2000 files costs 2000x5 ≈10s
+     *
+     * `react-native-fs` batch write files is too slow, it always encode
+     * any data to Base64 format and this queue maybe block the
+     * JavaScript event-loop. Consider use SQLite3 and transactions.
      */
     mkCache() {
         if (this._cacheWriting) {
@@ -261,26 +294,36 @@ class StoryList {
         async function runTasks() {
             const currTask = self._cacheQueue.shift();
             if (!currTask) {
+                // Insert remaining data instantly
+                await insertData(null, true);
                 Perf.info('Story cache written');
                 // Done
                 self._cacheWriting = false;
                 return;
             }
-            const { type, path, data } = currTask;
-            if (type === 'write') {
-                const duplicateIndex = self._cacheQueue.findLastIndex((v) => v.path === path);
-                // Skip the duplicate task
-                // Make sure just write once to disk in _cacheQueue
-                if (duplicateIndex < 0) {
-                    let content = data;
-                    if (typeof content === 'object') {
-                        content = JSON.stringify(content);
+            switch (currTask.type) {
+                case 'write': {
+                    const { path, data } = currTask;
+                    const duplicateIndex = self._cacheQueue.findLastIndex((v) => v.path === path);
+                    // Skip the duplicate task
+                    // Make sure just write once to disk in _cacheQueue
+                    if (duplicateIndex < 0) {
+                        let content = data;
+                        if (typeof content === 'object') {
+                            content = JSON.stringify(content);
+                        }
+                        await fs.writeFile(path, content).catch((e) => {
+                            // Write failed
+                            Perf.error(e);
+                        });
                     }
-                    await fs.writeFile(path, content).catch((e) => {
-                        // Write failed
-                        Perf.error(e);
-                    });
+                    break;
                 }
+                case 'insert':
+                    await insertData(currTask);
+                    break;
+                default:
+                    break;
             }
             return runTasks();
         }
@@ -307,16 +350,21 @@ class StoryList {
 
         try {
             await countSize(SL_DIR);
+            // SQLite3 database storage folder on Android
+            await countSize(`${fs.DocumentDirectoryPath}/../databases`);
         } catch (e) { /**/ }
 
         return { bytes };
     }
 
     async clearDisk() {
-        await fs.unlink(SL_DIR);
-        // Re-create dir for pending tasks in _cacheQueue
-        await fs.mkdir(SL_DIR_HTML);
-        await fs.mkdir(SL_DIR_JSOND);
+        await Promise.all([
+            fs.unlink(SL_IDS),
+            fs.unlink(ZERO),
+            initDB().then(deleteAllData),
+        ]);
+        this.ids = {};
+        this.data = [];
     }
 }
 
@@ -328,15 +376,26 @@ function createWriteTask(path, data) {
     };
 }
 
-// eslint-disable-next-line no-extend-native
-Array.prototype.findLastIndex = function findLastIndex(callbackFn, thisArg) {
-    let i = this.length - 1;
-    while (i >= 0) {
-        const ok = callbackFn(this[i], i);
-        if (ok) return i;
-        i--;
-    }
-    return -1;
-};
+function createInsertTask(table, data) {
+    return {
+        type: 'insert',
+        table,
+        data,
+    };
+}
+
+// Old version of bundled JavaScriptCore needs polyfill
+if (typeof Array.prototype.findLastIndex !== 'function') {
+    // eslint-disable-next-line no-extend-native
+    Array.prototype.findLastIndex = function findLastIndex(callbackFn, thisArg) {
+        let i = this.length - 1;
+        while (i >= 0) {
+            const ok = callbackFn(this[i], i);
+            if (ok) return i;
+            i--;
+        }
+        return -1;
+    };
+}
 
 export default new StoryList();
